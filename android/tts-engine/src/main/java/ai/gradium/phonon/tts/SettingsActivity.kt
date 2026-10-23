@@ -13,13 +13,19 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import java.io.File
-import kotlin.concurrent.thread
+import android.view.View
+import android.graphics.drawable.GradientDrawable
 
 /**
  * The engine's settings, which the system text-to-speech settings open: what is installed, and a
  * way to install a checkpoint folder from the phone's storage.
  */
 class SettingsActivity : Activity() {
+    private lateinit var installedInfo: TextView
+    private lateinit var previewSection: LinearLayout
+    private lateinit var cancelButton: Button
+    private var sizeForModel: Model.Loaded? = null
+    private var installedSize = 0L
     private lateinit var status: TextView
     private lateinit var importButton: Button
     private var importBytes = 0L
@@ -36,13 +42,15 @@ class SettingsActivity : Activity() {
     private val tokenStore by lazy { TokenStore(applicationContext) }
     private fun updateTokenStatus() {
         tokenStatus.text = try {
-            if (tokenStore.read() != null) "Token gespeichert (verschlüsselt)" else "Kein Token gespeichert"
-        } catch (_: Exception) { "Gespeicherter Token nicht lesbar. Token erneut eingeben und speichern; bei Bedarf gespeicherten Token löschen." }
+            if (tokenStore.read() != null) getString(R.string.token_saved) else getString(R.string.token_none)
+        } catch (_: Exception) { getString(R.string.token_error) }
     }
-    private fun saveToken(): Boolean = try {
+    private fun saveToken(): Boolean { return try {
+        if (token.text.isBlank()) { updateTokenStatus(); return false }
         tokenStore.save(token.text.toString().trim())
         token.text.clear(); updateTokenStatus(); true
-    } catch (_: Exception) { tokenStatus.text = "Token konnte nicht verschlüsselt gespeichert werden. Bitte erneut versuchen."; false }
+    } catch (_: Exception) { tokenStatus.text = getString(R.string.token_error); false }
+    }
     private var pendingPreview: (() -> Unit)? = null
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private val poll = object : Runnable {
@@ -53,12 +61,36 @@ class SettingsActivity : Activity() {
         super.onCreate(savedInstanceState)
         val pad = (16 * resources.displayMetrics.density).toInt()
         val column = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(pad, pad, pad, pad) }
-        fun add(view: android.view.View) { column.addView(view, MATCH_PARENT, WRAP_CONTENT) }
-        fun label(value: String) = TextView(this).apply { text = value; setPadding(0, pad, 0, pad / 2); add(this) }
-        fun button(title: Int, action: () -> Unit) = Button(this).apply { setText(title); setOnClickListener { action() }; add(this) }
-        label(getString(R.string.app_name)).textSize = 24f
-        status = label("")
+        var group = column
+        fun add(view: View) { group.addView(view, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { bottomMargin = pad / 2 }) }
+        fun label(value: String) = TextView(this).apply { text = value; textSize = 16f; setPadding(0, pad / 2, 0, pad / 2); add(this) }
+        fun button(title: Int, action: () -> Unit) = Button(this).apply { setText(title); isAllCaps = false; minHeight = 48 * pad / 16; setOnClickListener { action() }; add(this) }
+        fun section(title: Int): LinearLayout {
+            group = column
+            val surface = android.util.TypedValue().also { theme.resolveAttribute(android.R.attr.colorBackground, it, true) }.data
+            val card = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL; setPadding(pad, pad, pad, pad)
+                background = GradientDrawable().apply { cornerRadius = pad.toFloat(); setColor(surface); setStroke(1, 0x33808080) }
+            }
+            column.addView(card, LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT).apply { bottomMargin = pad })
+            group = card
+            label(getString(title)).apply { textSize = 20f; setTypeface(null, android.graphics.Typeface.BOLD); accessibilityHeadingCompat() }
+            return card
+        }
+        label(getString(R.string.app_name)).apply { textSize = 28f; accessibilityHeadingCompat() }
+        section(R.string.installed_model)
+        installedInfo = label("")
+        status = label("").apply { accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE }
+        cancelButton = button(R.string.cancel) { InstallService.cancel(); pendingPreview = null; preview?.stop() }
+        val downloadSection = section(R.string.model_actions)
+        label(getString(R.string.replacement_help))
+        val chooser = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; visibility = View.GONE }
+        downloadButton = button(R.string.choose_download) { chooser.visibility = if (chooser.visibility == View.VISIBLE) View.GONE else View.VISIBLE }
+        add(chooser)
+        group = chooser
         models = android.widget.Spinner(this).apply {
+            contentDescription = getString(R.string.choose_download)
+            minimumHeight = 48 * pad / 16
             adapter = android.widget.ArrayAdapter(this@SettingsActivity, android.R.layout.simple_spinner_dropdown_item,
                 ModelCatalog.all.map { getString(it.label) })
             add(this)
@@ -73,10 +105,10 @@ class SettingsActivity : Activity() {
         }
         tokenStatus = label("")
         updateTokenStatus()
-        Button(this).apply { text = "Token speichern"; setOnClickListener { saveToken() }; add(this) }
-        Button(this).apply { text = "Gespeicherten Token löschen"; setOnClickListener {
+        val save = Button(this).apply { setText(R.string.save_token); setOnClickListener { saveToken() }; add(this) }
+        val delete = Button(this).apply { setText(R.string.delete_token); setOnClickListener {
             try { tokenStore.delete(); token.text.clear(); updateTokenStatus() }
-            catch (_: Exception) { tokenStatus.text = "Token-Schlüssel konnte nicht gelöscht werden. Bitte erneut versuchen." }
+            catch (_: Exception) { tokenStatus.text = getString(R.string.token_error) }
         }; add(this) }
         val terms = button(R.string.open_terms) {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(ModelCatalog.all[models.selectedItemPosition].page)))
@@ -89,24 +121,28 @@ class SettingsActivity : Activity() {
                     if (model.gated) "CC-BY-NC 4.0" else "Apache 2.0") + "\n" + getString(if (model.gated) R.string.gated_help else R.string.free_help)
                 token.visibility = if (model.gated) android.view.View.VISIBLE else android.view.View.GONE
                 terms.visibility = token.visibility
+                tokenStatus.visibility = token.visibility; save.visibility = token.visibility; delete.visibility = token.visibility
                 token.text.clear()
             }
         }
-        downloadButton = button(R.string.download) {
+        button(R.string.download) {
+            if (InstallService.running || Model.installing) return@button
             val model = ModelCatalog.all[models.selectedItemPosition]
             if (model.gated && token.text.isNotBlank() && !saveToken()) return@button
             val readToken = try { if (model.gated) tokenStore.read() else null }
                 catch (_: Exception) { updateTokenStatus(); return@button }
             token.text.clear()
             val app = applicationContext
-            InstallService.start(this) { InstallService.download(app, model, readToken) }
+            confirmReplacement { InstallService.start(this) { InstallService.download(app, model, readToken) }; chooser.visibility = View.GONE }
             refresh()
         }
-        button(R.string.cancel) { InstallService.cancel(); pendingPreview = null; preview?.stop() }
-        importButton = button(R.string.import_folder) { startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION), PICK) }
-        button(R.string.system_settings) { startActivity(Intent("com.android.settings.TTS_SETTINGS")) }
-        label(getString(R.string.preview_help))
-        val voices = android.widget.Spinner(this).apply { add(this) }
+        group = downloadSection
+        section(R.string.local_import)
+        label(getString(R.string.import_help))
+        importButton = button(R.string.import_folder) { confirmReplacement { startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION), PICK) } }
+        previewSection = section(R.string.voice_preview)
+        label(getString(R.string.voice))
+        val voices = android.widget.Spinner(this).apply { contentDescription = getString(R.string.voice); minimumHeight = 48 * pad / 16; add(this) }
         voicePicker = voices
         voices.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
@@ -118,18 +154,20 @@ class SettingsActivity : Activity() {
         fun slider(title: Int, changed: (Int) -> Unit) {
             val value = label(getString(title, 100))
             add(android.widget.SeekBar(this).apply {
+                contentDescription = getString(R.string.preview_rate, 100)
+                minimumHeight = 48 * pad / 16
                 max = 150; progress = 50
                 setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
                     override fun onStartTrackingTouch(bar: android.widget.SeekBar?) {}
                     override fun onStopTrackingTouch(bar: android.widget.SeekBar?) {}
                     override fun onProgressChanged(bar: android.widget.SeekBar?, progress: Int, user: Boolean) {
-                        changed(progress + 50); value.text = getString(title, progress + 50)
+                        changed(progress + 50); value.text = getString(title, progress + 50); bar?.contentDescription = value.text
                     }
                 })
             })
         }
         slider(R.string.preview_rate) { rate = it }
-        val sample = android.widget.EditText(this).apply { setText(getString(R.string.preview_text)); add(this) }
+        val sample = android.widget.EditText(this).apply { setText(getString(R.string.preview_text)); contentDescription = getString(R.string.sample_text); minHeight = 48 * pad / 16; add(this) }
         button(R.string.preview) {
             if (Model.state !is Model.State.Ready || Model.installing) {
                 refresh()
@@ -159,9 +197,7 @@ class SettingsActivity : Activity() {
                     handler.post {
                         if (!isFinishing && !isDestroyed) {
                             previewReady = result == android.speech.tts.TextToSpeech.SUCCESS
-                            if (previewReady) {
-                                status.text = getString(R.string.preview_ready)
-                            } else {
+                            if (!previewReady) {
                                 preview?.shutdown(); preview = null
                             }
                             val requested = pendingPreview
@@ -177,7 +213,12 @@ class SettingsActivity : Activity() {
             }
         }
         button(R.string.stop_preview) { pendingPreview = null; preview?.stop() }
-        label(getString(R.string.import_help))
+        // Move preview directly after installed status.
+        column.removeView(previewSection)
+        column.addView(previewSection, 2)
+        section(R.string.system_section)
+        button(R.string.system_settings) { startActivity(Intent("com.android.settings.TTS_SETTINGS")) }
+        section(R.string.details_section)
         label(getString(R.string.about_fork))
         button(R.string.licenses) {
             val names = listOf("LICENSE-MIT", "LICENSE-APACHE", "Sonic-LICENSE.txt", "NOTICE.txt", "German-Voices-NOTICE.txt")
@@ -186,8 +227,21 @@ class SettingsActivity : Activity() {
             android.app.AlertDialog.Builder(this).setTitle(R.string.licenses)
                 .setView(ScrollView(this).apply { addView(view) }).setPositiveButton(android.R.string.ok, null).show()
         }
-        setContentView(ScrollView(this).apply { fitsSystemWindows = true; addView(column) })
+        setContentView(ScrollView(this).apply {
+            addView(column)
+            setOnApplyWindowInsetsListener { view, insets ->
+                if (android.os.Build.VERSION.SDK_INT >= 30) {
+                    val bars = insets.getInsets(android.view.WindowInsets.Type.systemBars() or android.view.WindowInsets.Type.ime())
+                    view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+                } else {
+                    @Suppress("DEPRECATION")
+                    view.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop, insets.systemWindowInsetRight, insets.systemWindowInsetBottom)
+                }
+                insets
+            }
+        })
         Model.load(this)
+        refresh()
     }
 
     override fun onResume() { super.onResume(); handler.post(poll) }
@@ -210,6 +264,21 @@ class SettingsActivity : Activity() {
         refresh()
     }
 
+    private fun TextView.accessibilityHeadingCompat() {
+        if (android.os.Build.VERSION.SDK_INT >= 28) isAccessibilityHeading = true
+    }
+
+    private fun confirmReplacement(action: () -> Unit) {
+        if (InstallService.running || Model.installing) return
+        if (!Model.dir(this).exists()) { action(); return }
+        android.app.AlertDialog.Builder(this).setTitle(R.string.replace_title)
+            .setMessage(R.string.replace_message)
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(R.string.replace_confirm) { _, _ ->
+                if (!InstallService.running && !Model.installing) action()
+            }.show()
+    }
+
     private fun refresh() {
         val busy = InstallService.running || Model.installing
         val loaded = (Model.state as? Model.State.Ready)?.model
@@ -226,16 +295,26 @@ class SettingsActivity : Activity() {
                 voiceChoices.map { (lang, speaker) -> "${BundledVoices.label(speaker)} ($lang)" })
             if (selected >= 0) voicePicker.setSelection(selected)
         }
+        previewSection.visibility = if (loaded != null && !busy) View.VISIBLE else View.GONE
+        cancelButton.visibility = if (busy) View.VISIBLE else View.GONE
+        if (loaded !== sizeForModel || installedSize == 0L) {
+            sizeForModel = loaded
+            installedSize = Model.dir(this).walkTopDown().filter { it.isFile }.sumOf { it.length() }
+        }
+        installedInfo.text = if (Model.dir(this).exists()) getString(R.string.installed_details,
+            (loaded?.languages ?: Model.languages(this)).joinToString(", "), installedSize / 1_000_000.0)
+            else getString(R.string.not_installed)
         voicePicker.isEnabled = loaded != null && !busy
         importButton.isEnabled = !busy
         downloadButton.isEnabled = !busy
         models.isEnabled = !busy
-        status.text = if (InstallService.running || InstallService.message.isNotEmpty()) InstallService.message else when (val s = Model.state) {
+        val modelStatus = when (val s = Model.state) {
             is Model.State.NotInstalled -> getString(R.string.not_installed)
             is Model.State.Loading -> getString(R.string.loading)
             is Model.State.Failed -> getString(R.string.load_failed, s.message)
             is Model.State.Ready -> getString(R.string.ready, s.model.languages.joinToString(", "), s.model.speakers.joinToString(", ") { BundledVoices.label(it) }.ifEmpty { "-" })
         }
+        status.text = listOf(modelStatus, InstallService.message).filter { it.isNotBlank() }.joinToString("\n")
     }
 
     /** Copy the files a checkpoint folder needs from the picked folder into [into]. */

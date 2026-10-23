@@ -10,6 +10,19 @@ for abi in arm64-v8a x86_64; do
         exit 1
     }
 done
+# Source-level consent regression; runtime dialog behavior still needs a phone.
+python3 - "$APP_DIR" <<'CHECK'
+from pathlib import Path
+import sys
+source = (Path(sys.argv[1]) / 'src/main/java/ai/gradium/phonon/tts/SettingsActivity.kt').read_text()
+assert 'confirmReplacement { InstallService.start(this)' in source
+assert 'confirmReplacement { startActivityForResult' in source
+consent = source[source.index('private fun confirmReplacement'):source.index('private fun refresh')]
+assert '.setNegativeButton(android.R.string.cancel, null)' in consent
+assert '.setPositiveButton(R.string.replace_confirm)' in consent
+assert 'Model.install(' not in consent and 'delete' not in consent
+print('Settings consent source checks passed (download, SAF import, inert cancel).')
+CHECK
 "$APP_DIR/gradlew" -p "$APP_DIR" assembleDebug testDebugUnitTest --tests ai.gradium.phonon.tts.FocusedTest --tests ai.gradium.phonon.tts.ProgressTest --console=plain
 python3 - "$APP_DIR" "$ARTIFACT_DIR" <<'PY'
 import json, hashlib, pathlib, shutil, struct, sys, zipfile
@@ -34,7 +47,7 @@ with zipfile.ZipFile(apk) as archive:
     assert archive.getinfo('assets/licenses/German-Voices-NOTICE.txt').file_size > 100
     for name in ['LICENSE-MIT' ,'LICENSE-APACHE','Sonic-LICENSE.txt','NOTICE.txt']:
         assert archive.getinfo(f'assets/licenses/{name}').file_size > 100
-out = destination / 'Phonon-TTS-v0.4.1-android.4-debug.apk'
+out = destination / 'Phonon-TTS-v0.4.1-android.5-debug.apk'
 shutil.copy2(apk,out)
 sha = hashlib.sha256(out.read_bytes()).hexdigest()
 checksum = out.with_name(out.name + '.sha256')

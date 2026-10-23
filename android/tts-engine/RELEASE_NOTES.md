@@ -1,3 +1,20 @@
+# 0.4.1-android.5 (versionCode 6)
+
+Ruhige Settings mit sichtbarer aktueller Modellkopie, Sprachen, lokaler Größe und
+Lade-/Fehlerstatus. Stimme und Tempo-Vorschau erscheinen bei bereitem Modell.
+Modellauswahl erst auf Wunsch; separater lokaler SAF-Import. Download und Import
+bestätigen bei vorhandenem Modell ausdrücklich den Ersatz. Abbrechen startet keine
+Installation. Es bleibt jeweils genau ein Modell installiert; Rollback bleibt erhalten.
+Systemabhängiges helles/dunkles Theme, scrollbare gruppierte Flächen, große Bedienelemente,
+Systemleisten-Abstände und deutsche/englische Beschriftungen. Keine neue UI-Abhängigkeit.
+HF-Bedingungen und maskierte, verschlüsselte Tokenverwaltung nur bei gated Auswahl.
+
+Normales Update mit derselben Signatur erhält filesDir/model, Stimmen, Einstellungen
+und gespeicherten Token. Nicht deinstallieren, keine App-Daten löschen. Paket-ID,
+Signierung, native Bibliotheken, 13 Stimmen und Berechtigungen bleiben unverändert.
+Pitch bleibt deaktiviert. Kein Gerät/Emulator angeschlossen: visuelle und Android-
+Laufzeitprüfung einschließlich Update-Persistenz bleiben offen.
+
 # 0.4.1-android.4 (versionCode 5)
 
 Die Engine meldet jetzt satzweise Textpositionen über Android rangeStart (API 26+).

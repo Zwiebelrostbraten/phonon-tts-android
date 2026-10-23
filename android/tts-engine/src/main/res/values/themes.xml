@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Dark status bar icons, since the light page shows through the bar. -->
-    <style name="Settings" parent="@android:style/Theme.DeviceDefault.Light.NoActionBar">
+    <style name="Settings" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#35685E</item>
+        <item name="android:windowBackground">#F3F5F4</item>
+        <item name="android:colorBackground">#FFFFFF</item>
+        <item name="android:statusBarColor">#F3F5F4</item>
+        <item name="android:navigationBarColor">#F3F5F4</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 </resources>

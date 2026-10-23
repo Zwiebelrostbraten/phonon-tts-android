@@ -156,3 +156,26 @@ verified packaged embeddings, licenses and native libraries and refreshed the
 final .3 APK and .sha256 sidecar listed above. No functionality, permissions or
 signing configuration changed; no additional tests, CI, emulator or review ran.
 Build log: /opt/data/profiles/mrs_patmore/cache/scratch/phonon-android3-claims-build.log.
+
+## Settings preview .5 / code 6
+
+Current model copy, languages, local size and loading/errors lead the screen.
+Ready-only voice/tempo preview, explicit download selection and separate SAF import
+follow. Both replacement entry points confirm the single-model contract; dialog
+cancel has no callback. Storage, staging, rollback and token semantics are unchanged.
+Platform widgets follow the device light/dark theme without new dependencies.
+
+Validation: package-preview succeeded; 9 FocusedTest + 5 ProgressTest cases passed.
+Source checks verify replacement confirmation on download/import and inert cancel.
+apksigner verified the APK; certificate SHA-256 matches .4:
+63e64d670aced1303b1b8cabbdfe879e99c7c9396891c2662970cc3c82d856d0.
+Package ai.gradium.phonon.tts, version 0.4.1-android.5 / code 6 and unchanged APK
+permissions were checked. All four .so libraries and all 13 voice embeddings are
+byte-identical to .4. Packaging validates voice hashes and ELF architectures.
+Previous .1–.4 artifact paths are preserved; no push/release was performed.
+
+APK SHA-256: 81d7c14c3ecb644f594467ec63529dfe6ec1e41d2ec167bf2e4ec14eda983be1
+
+No device/emulator visual test, AndroidKeyStore test or actual update-persistence
+test was performed. Same-signature identity and unchanged storage paths support
+normal update retention, but do not replace a phone test. Logs remain in profile scratch.
