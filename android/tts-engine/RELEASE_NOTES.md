@@ -1,3 +1,26 @@
+# 0.4.1-android.7 (versionCode 8)
+
+Small packaging update to the .6 Compose Material 3 redesign. System light/dark
+Material 3 settings and all existing controls remain unchanged. The preview now
+uses assembleRelease with R8 minification and the same Android Debug certificate.
+Artifact: Phonon-TTS-v0.4.1-android.7.apk (no -debug filename suffix).
+21,536,168 bytes (about 21.5 MB) versus unminified .6 at 31,861,326 bytes and pre-Compose .5 at
+20,866,455 bytes: about 10.3 MB smaller than .6, only about 670 KB (669,713 bytes) above .5.
+The .6 artifact and release are preserved. No new dependencies or features.
+
+Same application ID, signer, permissions, filesDir/model, native engine, 13 voices,
+voice preferences and encrypted token behavior. Update in place without uninstalling
+or clearing app data. API 24+, arm64-v8a/x86_64; ARM64 CPU requires dotprod/FP16.
+Pitch remains disabled; sentence markers are API 26+ with no word alignment.
+Kindle integration depends on the reader. No device/emulator was available:
+visual behavior, native speech, AndroidKeyStore and actual update persistence
+remain unverified. Host packaging/signature checks establish update metadata only.
+
+# 0.4.1-android.6 (versionCode 7)
+
+Settings rebuilt with Compose Material 3, preserving model installation, voice,
+tempo and token behavior. The original unminified debug preview remains available.
+
 # 0.4.1-android.5 (versionCode 6)
 
 Ruhige Settings mit sichtbarer aktueller Modellkopie, Sprachen, lokaler Größe und

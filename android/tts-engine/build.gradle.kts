@@ -26,8 +26,8 @@ android {
         minSdk = 24
         targetSdk = 36
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
-        versionCode = 7
-        versionName = "0.4.1-android.6"
+        versionCode = 8
+        versionName = "0.4.1-android.7"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     // What android/build.sh writes.

@@ -1,10 +1,10 @@
 # Phonon TTS — Android community fork
 
-This is the Android system TTS app from [gradium-ai/xn-ptts](https://github.com/gradium-ai/xn-ptts), extended in the [Zwiebelrostbraten community fork](https://github.com/Zwiebelrostbraten/phonon-tts-android). It is not an official Gradium Android release. App version: **0.4.1-android.5**, versionCode **6**. The upstream Rust workspace version is unchanged.
+This is the Android system TTS app from [gradium-ai/xn-ptts](https://github.com/gradium-ai/xn-ptts), extended in the [Zwiebelrostbraten community fork](https://github.com/Zwiebelrostbraten/phonon-tts-android). It is not an official Gradium Android release. App version: **0.4.1-android.7**, versionCode **8**. The upstream Rust workspace version is unchanged.
 
 ## Install and use
 
-1. Install `Phonon-TTS-v0.4.1-android.5-debug.apk`, allowing installation from your browser/file manager when Android asks. This preview is debug-signed. The app ID remains `ai.gradium.phonon.tts`; install this over the existing community preview. Same-signature updates preserve filesDir/model, voices, preferences and the encrypted token. Do not uninstall or clear app data to update.
+1. Install `Phonon-TTS-v0.4.1-android.7.apk`, allowing installation from your browser/file manager when Android asks. This preview is debug-signed. The app ID remains `ai.gradium.phonon.tts`; install this over the existing community preview. Same-signature updates preserve filesDir/model, voices, preferences and the encrypted token. Do not uninstall or clear app data to update.
 2. Open **Phonon TTS** to see the installed copy, languages, size and loading status. Voice and tempo preview appear when ready. To replace or install a model, tap **Choose a model to download…**, choose a model, and tap **Download model / Modell herunterladen**. English needs no account. German and multilingual need personal Hugging Face approval: open the model page, accept the license, and enter your own HF read token **in the app**, never in an issue/chat. The token is encrypted with AndroidKeyStore AES/GCM and persisted in `noBackupFilesDir` when you tap **Token speichern** or start a gated download with a new token. A saved token is reused; entering another token optionally replaces it. The input stays empty after saving: an empty field does not mean deletion. Use **Gespeicherten Token löschen** to delete the saved token. A token never saved by earlier versions must be entered once again. Same-signature updates preserve it; uninstalling or clearing app data removes it. The download runs as a foreground operation; its notification reopens the app or cancels it.
 3. Wait for installation **and native loading** to succeed. Failed downloads, cancellation and failed activation retain the previous checkpoint. Only one model is installed at a time. Download and local import require explicit replacement confirmation when a model folder exists; cancelling that confirmation never starts installation or changes the current copy. Model selection itself does not download anything.
 4. Open the system text-to-speech settings using the app button, select **Phonon TTS** as the preferred engine, and choose a language the installed model supports. Apps using Android `TextToSpeech` then use this engine.
@@ -38,7 +38,7 @@ Upstream MIT/Apache-2.0 licenses, Sonic Apache-2.0 license and attribution are a
 
 ## Build and focused checks
 
-JDK 17, SDK platform 36, NDK and Rust/cargo-ndk are required. The existing CPU native build supplies the real libraries; do not publish an APK missing them.
+JDK 17, SDK platform 37, NDK and Rust/cargo-ndk are required. The existing CPU native build supplies the real libraries; do not publish an APK missing them.
 
 ```sh
 ./android/build.sh
@@ -46,9 +46,9 @@ cd android/tts-engine
 ./package-preview.sh
 ```
 
-For manual preview packaging run `./android/tts-engine/package-preview.sh` from the repository root. It refuses missing native libraries, runs only the build and focused JVM tests, checks ELF architectures/JNA/licenses and all 13 bundled embedding sizes/digests in the APK, then copies the named APK and SHA-256 sidecar to the parent directory. No CI is enabled.
+For manual preview packaging run `./android/tts-engine/package-preview.sh` from the repository root. It refuses missing native libraries, runs `assembleRelease` (including any incidental lintVitalRelease) and the 9 + 5 + 5 focused JVM tests, checks ELF architectures/JNA/licenses and all 13 bundled embedding sizes/digests in the APK, then copies the named APK and SHA-256 sidecar to the parent directory. No CI is enabled.
 
-Output: `build/outputs/apk/debug/phonon-tts-engine-debug.apk`. Verify that it contains **both** `lib/arm64-v8a/libptts_ffi.so` and `lib/x86_64/libptts_ffi.so`, JNA dispatch libraries and `assets/licenses/`. Debug signing is for preview testing; use a maintained private signing key for a production distribution.
+Output: `build/outputs/apk/release/phonon-tts-engine-release.apk`. Verify that it contains **both** `lib/arm64-v8a/libptts_ffi.so` and `lib/x86_64/libptts_ffi.so`, JNA dispatch libraries and `assets/licenses/`. Debug signing is for preview testing; use a maintained private signing key for a production distribution.
 
 Focused JVM checks cover ignored pitch requests and independent waveform tempo, request percentage mapping, bounded/aligned output, token stripping, redirect policy, complete/hash validation and checkpoint rollback/crash recovery, plus AES/GCM integrity and storage replacement failure handling (9 focused JVM tests). These host checks do not verify AndroidKeyStore or update persistence on a device. No emulator or broad test suite is required. These checks do not establish Android runtime quality or native speech correctness. See [FORK_NOTES.md](FORK_NOTES.md) for the actual build results.
 
@@ -59,3 +59,5 @@ No word alignment is available; exact word highlighting is not claimed. API 24�
 still plays speech without range notifications. Kindle behavior awaits phone testing.
 
 Version .5 reorganizes settings into installed status, voice preview, explicit download selection, separate SAF import, Android settings and offline licenses. Native platform widgets follow the device light/dark theme without new UI dependencies. System bar/keyboard insets and scrollable content are handled; visual, accessibility and update-persistence behavior still require a real phone.
+
+Version .7 retains the .6 Compose Material 3 redesign (system light/dark theme, grouped settings and existing model/voice controls). Packaging now uses the R8-minified release build, signed with the same Android Debug certificate for preview updates. No UI/features or dependencies changed from .6. The APK is 21,536,168 bytes (about 21.5 MB) versus .6 unminified at 31,861,326 bytes and pre-Compose .5 at 20,866,455 bytes: about 10.3 MB smaller than .6 and 670 KB (669,713 bytes) above .5. The .6 artifact and GitHub release remain available. This packaging validation does not establish visual, native speech, AndroidKeyStore or actual update-persistence behavior on a device.

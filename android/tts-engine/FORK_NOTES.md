@@ -1,6 +1,6 @@
 # Android fork implementation notes
 
-Current status: **0.4.1-android.3**, versionCode **4**, with encrypted persistent HF tokens and 13 bundled public German voice embeddings. See the .3 section below and the latest delivery refresh at the end. Earlier build records and implementation claims describe historical versions; memory-only/no-storage token claims and .1/.2 version references do not describe the current app.
+Current status: **0.4.1-android.7**, versionCode **8**, with encrypted persistent HF tokens and 13 bundled public German voice embeddings. See the .3 section below and the latest delivery refresh at the end. Earlier build records and implementation claims describe historical versions; memory-only/no-storage token claims and .1/.2 version references do not describe the current app.
 
 Base: upstream `6fc8b65f7e71146517098aa428c8cfa135b4fcb5` in the existing community fork. No new engine or renamed upstream ownership claim. No commits, pushes, GitHub API calls, emulator, CI runs or broad test suite performed for this task. Rust sources, Cargo files, native build script and shared Kotlin wrapper were left unchanged. The native CPU build is complete; both real ABI libraries are packaged and verified.
 
@@ -179,3 +179,33 @@ APK SHA-256: 81d7c14c3ecb644f594467ec63529dfe6ec1e41d2ec167bf2e4ec14eda983be1
 No device/emulator visual test, AndroidKeyStore test or actual update-persistence
 test was performed. Same-signature identity and unchanged storage paths support
 normal update retention, but do not replace a phone test. Logs remain in profile scratch.
+
+
+## .7 packaging optimization (2026-10-23)
+
+Same .6 Compose Material 3 UI and dependencies; versionName 0.4.1-android.7,
+versionCode 8. package-preview.sh now uses assembleRelease plus the existing three
+focused JVM test classes and copies the actual release APK with no -debug suffix.
+R8 minification and existing debug signing configuration are retained.
+
+Packaging succeeded after retrying a disappeared Gradle daemon with two workers.
+19 focused tests (9 + 5 + 5) passed; test task was up to date and XML verified.
+No separate lint, broad suite, emulator, CI or review was run. Release build may
+run lintVitalRelease incidentally. All 13 voice sizes/SHA-256 values and manifest
+passed the packaging gate and are byte-identical to .5/.6. apksigner verified .5,
+.6 and .7 with certificate SHA-256
+63e64d670aced1303b1b8cabbdfe879e99c7c9396891c2662970cc3c82d856d0.
+aapt confirms ai.gradium.phonon.tts, code 8, version 0.4.1-android.7 and unchanged
+permissions. zipalign 16 KiB check passed. Original four native libraries are
+byte-identical to .5/.6; Compose adds libandroidx.graphics.path.so for arm64-v8a
+and x86_64 (already in .6). No native engine rebuild.
+
+Artifact: /opt/data/projects/Phonon-TTS-v0.4.1-android.7.apk
+Size: 21,536,168 bytes; .6 unminified 31,861,326; .5 20,866,455.
+Reduction from .6: 10,325,158 bytes (32.4%); increase over .5: 669,713 bytes.
+SHA-256: 9cf30dc0aa4536528c77a23fd8e3253e2e35ec11a04d17b15b9fcd6866b01277
+Exact .sha256 sidecar verified. Existing .1–.6 artifacts preserved.
+Logs/scratch: /opt/data/profiles/mrs_patmore/scratch/phonon-android7.
+Same identity/signature and higher versionCode support an in-place update;
+filesDir/model, token and voice behavior are unchanged. No device was available;
+actual update persistence, visuals, AndroidKeyStore and native speech remain untested.
