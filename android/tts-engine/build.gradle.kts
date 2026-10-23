@@ -1,6 +1,7 @@
 plugins {
-    id("com.android.application") version "8.13.0"
+    id("com.android.application") version "9.1.1"
     id("org.jetbrains.kotlin.android") version "2.2.20"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.2.20"
 }
 
 // The engine speaks through the same Kotlin wrapper apps copy, android/PhononTTS.kt, so it is
@@ -19,14 +20,14 @@ androidComponents.onVariants { it.sources.java?.addGeneratedSourceDirectory(shar
 
 android {
     namespace = "ai.gradium.phonon.tts"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig {
         applicationId = "ai.gradium.phonon.tts"
         minSdk = 24
         targetSdk = 36
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
-        versionCode = 6
-        versionName = "0.4.1-android.5"
+        versionCode = 7
+        versionName = "0.4.1-android.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     // What android/build.sh writes.
@@ -39,6 +40,7 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
+    buildFeatures { compose = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -48,6 +50,11 @@ android {
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
 
 dependencies {
+    implementation(platform("androidx.compose:compose-bom:2026.09.00"))
+    implementation("androidx.activity:activity-compose:1.11.0")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.ui:ui")
     testImplementation("junit:junit:4.13.2")
     implementation("net.java.dev.jna:jna:5.17.0@aar")
     androidTestImplementation("androidx.test:runner:1.6.2")

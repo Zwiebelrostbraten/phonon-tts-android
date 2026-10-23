@@ -2,7 +2,7 @@
 <resources>
   <string name="app_name">Phonon TTS</string>
   <string name="import_folder">Lokalen Modellordner auswählen…</string>
-  <string name="system_settings">Systemeinstellungen für Sprachausgabe öffnen</string>
+  <string name="system_settings">Android-Sprachausgabe</string>
   <string name="import_help">Lokalen Ordner mit config.json, tokenizer.json und Modellgewichten (.gguf oder .safetensors) wählen. Optionale Stimmen werden mitkopiert.</string>
   <string name="not_installed">Noch kein Modell installiert.</string>
   <string name="loading">Modell wird geladen…</string>
@@ -18,9 +18,9 @@
   <string name="cancel">Download / Import abbrechen</string>
   <string name="open_terms">Modellseite / Bedingungen öffnen</string>
   <string name="model_details">Download: %1$.1f MB · %2$s</string>
-  <string name="gated_help">Nur gemäß CC-BY-NC 4.0 nutzen (nicht kommerziell, mit Namensnennung). Modellseite öffnen und Bedingungen akzeptieren, dann eigenen HF-Lesetoken verwenden. Gespeicherte Token werden verschlüsselt wiederverwendet. Ein leeres Feld behält den Token; nur Löschen entfernt ihn.</string>
+  <string name="gated_help">CC-BY-NC 4.0: nur nichtkommerziell, mit Namensnennung. Akzeptiere die Bedingungen auf Hugging Face und speichere deinen eigenen Lesetoken.</string>
   <string name="free_help">Kein Konto nötig. Nur Englisch; dieses Modell spricht kein Deutsch.</string>
-  <string name="token_hint">Gespeicherter HF-Token wird verwendet; Eingabe zum optionalen Ersetzen</string>
+  <string name="token_hint">Leer lassen, um den gespeicherten Token zu behalten.</string>
   <string name="installing_model">Modell wird installiert…</string>
   <string name="download_background">Läuft im Hintergrund weiter. App für Fortschritt oder Abbruch öffnen.</string>
   <string name="install_complete">Modell erfolgreich installiert und geladen.</string>
@@ -30,12 +30,12 @@
   <string name="preview">Vorschau sprechen</string>
   <string name="stop_preview">Vorschau stoppen</string>
   <string name="licenses">Lizenzen (offline)</string>
-  <string name="about_fork">0.4.1-android.5 · Community-Fork\nGradium Phonon · Lokale Sprachsynthese</string>
+  <string name="about_fork">0.4.1-android.6 · Community-Fork · Offline-Sprachausgabe</string>
   <string name="installed_model">Installiertes Modell</string>
-  <string name="installed_details">Aktuelle Kopie · %1$s\nGröße auf dem Gerät: %2$.1f MB</string>
+  <string name="installed_details">%1$s · %2$.1f MB auf dem Gerät</string>
   <string name="model_actions">Modell herunterladen</string>
-  <string name="choose_download">Modell zum Download auswählen…</string>
-  <string name="replacement_help">Es ist jeweils ein Modell installiert. Download oder Import eines anderen Modells ersetzt die aktuelle Kopie. App-Updates erhalten sie.</string>
+  <string name="choose_download">Modell herunterladen</string>
+  <string name="replacement_help">Ein Modell auf dem Gerät. Ein Download oder Import ersetzt es nach Bestätigung. App-Updates behalten es.</string>
   <string name="local_import">Vom Gerät importieren</string>
   <string name="voice_preview">Stimme und Vorschau</string>
   <string name="voice">Stimme</string>
@@ -50,4 +50,8 @@
   <string name="token_saved">Token gespeichert (verschlüsselt)</string>
   <string name="token_none">Kein Token gespeichert</string>
   <string name="token_error">Token konnte nicht gelesen oder gespeichert werden. Erneut eingeben und speichern; bei Bedarf gespeicherten Token löschen.</string>
+  <string name="model_ready">Bereit</string>
+  <string name="model_storage">Modell verwalten</string>
+  <string name="hf_token">Hugging Face Token</string>
+  <string name="preview_failed">Vorschau konnte nicht gestartet werden.</string>
 </resources>

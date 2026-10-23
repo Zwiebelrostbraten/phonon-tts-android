@@ -2,7 +2,7 @@
 <resources>
   <string name="app_name">Phonon TTS</string>
   <string name="import_folder">Choose local model folder…</string>
-  <string name="system_settings">Open the system text-to-speech settings</string>
+  <string name="system_settings">Android speech settings</string>
   <string name="import_help">Choose a local folder with config.json, tokenizer.json and model weights (.gguf or .safetensors). Optional voices are copied too.</string>
   <string name="not_installed">No model installed.</string>
   <string name="loading">Loading the model…</string>
@@ -18,9 +18,9 @@
   <string name="cancel">Cancel download / import</string>
   <string name="open_terms">Open model page / terms</string>
   <string name="model_details">Download: %1$.1f MB · %2$s</string>
-  <string name="gated_help">Use only as permitted by CC-BY-NC 4.0 (non-commercial, with attribution). Open the model page and accept its terms, then use your own HF read token. Saved tokens are encrypted and reused. An empty field keeps the saved token; use Delete to remove it.</string>
+  <string name="gated_help">CC-BY-NC 4.0: non-commercial use with attribution. Accept the terms on Hugging Face, then save your own read token.</string>
   <string name="free_help">No account needed. English only; this model does not speak German.</string>
-  <string name="token_hint">Saved HF token is reused; enter a token to optionally replace it</string>
+  <string name="token_hint">Leave blank to keep the saved token.</string>
   <string name="installing_model">Installing model…</string>
   <string name="download_background">Continues in background. Open app for progress or cancel.</string>
   <string name="install_complete">Model installed and loaded successfully.</string>
@@ -30,12 +30,12 @@
   <string name="preview">Speak preview</string>
   <string name="stop_preview">Stop preview</string>
   <string name="licenses">Offline licenses</string>
-  <string name="about_fork">0.4.1-android.5 · Community fork\nGradium Phonon · Local speech synthesis</string>
+  <string name="about_fork">0.4.1-android.6 · Community fork · Offline speech</string>
   <string name="installed_model">Installed model</string>
-  <string name="installed_details">Current copy · %1$s\nSize on device: %2$.1f MB</string>
+  <string name="installed_details">%1$s · %2$.1f MB on device</string>
   <string name="model_actions">Download a model</string>
-  <string name="choose_download">Choose a model to download…</string>
-  <string name="replacement_help">One model is installed at a time. Downloading or importing another model replaces the current copy. App updates keep it.</string>
+  <string name="choose_download">Download a model</string>
+  <string name="replacement_help">One model on this device. Downloading or importing a new one replaces it after confirmation. App updates keep it.</string>
   <string name="local_import">Import from device</string>
   <string name="voice_preview">Voice &amp; preview</string>
   <string name="voice">Voice</string>
@@ -50,4 +50,8 @@
   <string name="token_saved">Token saved (encrypted)</string>
   <string name="token_none">No token saved</string>
   <string name="token_error">Token could not be read or saved. Enter and save it again; delete the saved token if needed.</string>
+  <string name="model_ready">Ready to speak</string>
+  <string name="model_storage">Model storage</string>
+  <string name="hf_token">Hugging Face token</string>
+  <string name="preview_failed">Preview could not start.</string>
 </resources>
