@@ -37,6 +37,15 @@ object Model {
     @Volatile var state: State = State.NotInstalled
         private set
 
+    private val installLock = Any()
+    @Volatile var installing = false
+        private set
+
+    @Synchronized
+    private fun recover(context: Context) {
+        if (state !is State.Ready && pending?.isDone != false) CheckpointSwap.recover(dir(context))
+    }
+
     private val loader = Executors.newSingleThreadExecutor()
     private var pending: Future<*>? = null
 
@@ -67,6 +76,7 @@ object Model {
     /** Start loading the installed checkpoint, unless it is loaded or loading already. */
     @Synchronized
     fun load(context: Context): Future<*>? {
+        recover(context)
         if (state is State.Ready || pending?.isDone == false) return pending
         if (!installed(context)) {
             state = State.NotInstalled
@@ -106,29 +116,44 @@ object Model {
      * it. [fill] runs on the calling thread, which must not be the main one. This is the one way
      * in: a download from a model hub would be another [fill].
      */
-    fun install(context: Context, fill: (File) -> Unit) {
+    fun install(context: Context, cancelled: () -> Boolean = { false }, fill: (File) -> Unit) = synchronized(installLock) {
+        installing = true
         val staging = File(context.filesDir, "model.staging")
-        staging.deleteRecursively()
-        staging.mkdirs()
         try {
+            recover(context)
+            check(!staging.exists() || staging.deleteRecursively()) { "Cannot clear staging folder" }
+            check(staging.mkdirs()) { "Cannot create staging folder" }
             fill(staging)
             for (name in listOf("config.json", "tokenizer.json")) {
-                require(File(staging, name).isFile) { "the folder has no $name" }
+                require(File(staging, name).isFile) { "Missing $name" }
             }
             require(File(staging, "model.q8.gguf").isFile || File(staging, "model.safetensors").isFile) {
-                "the folder has no model.q8.gguf or model.safetensors"
+                "Missing model weights"
             }
-            // Held across the swap, so a load() from the service cannot start on the old folder
-            // between unloading it and replacing it.
+            // Validate the actual native checkpoint before touching the installed model.
+            Os.setenv("RAYON_NUM_THREADS", THREADS.toString(), false)
+            PhononTTS(staging.path, "none").use { it.voices }
+            if (cancelled()) throw java.util.concurrent.CancellationException()
             synchronized(this) {
-                unload()
-                dir(context).deleteRecursively()
-                check(staging.renameTo(dir(context))) { "could not move the checkpoint into place" }
+                unload() // waits for active synthesis under the loaded-model lock
+                try {
+                    CheckpointSwap.replace(staging, dir(context)) {
+                        val tts = PhononTTS(dir(context).path, "none")
+                        try { state = State.Ready(Loaded(tts, tts.voices, tts.languages)) }
+                        catch (t: Throwable) { tts.close(); throw t }
+                    }
+                } catch (t: Throwable) {
+                    (state as? State.Ready)?.model?.tts?.close()
+                    state = State.NotInstalled
+                    pending = null
+                    load(context)
+                    throw t
+                }
             }
         } finally {
             staging.deleteRecursively()
+            installing = false
         }
-        load(context)
     }
 
     /** Free the loaded model, once whatever is speaking with it has finished. */

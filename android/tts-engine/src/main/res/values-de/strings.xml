@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Phonon TTS</string>
+    <string name="import_folder">Checkpoint-Ordner importieren</string>
+    <string name="system_settings">Systemeinstellungen für Sprachausgabe öffnen</string>
+    <string name="import_help">Ordner mit config.json, tokenizer.json, Modellgewichten und optional Stimmen wählen. Anschließend Phonon TTS als bevorzugte Engine in den Systemeinstellungen auswählen. Alle Dateien bleiben auf dem Gerät. Kindle-Apps unterstützen nicht durchgehend die Android-Systemsprachausgabe.</string>
+    <string name="not_installed">Noch kein Modell installiert.</string>
+    <string name="loading">Modell wird geladen…</string>
+    <string name="importing">Import läuft…</string>
+    <string name="copying">%1$s wird kopiert…</string>
+    <string name="ready">Bereit.\nSprachen: %1$s\nStimmen: %2$s</string>
+    <string name="load_failed">Modell konnte nicht geladen werden: %1$s</string>
+    <string name="import_failed">Installation fehlgeschlagen: %1$s</string>
+    <string name="english_free">Englisch (frei)</string>
+    <string name="german">Deutsch</string>
+    <string name="multilingual">Mehrsprachig</string>
+    <string name="download">Modell herunterladen</string>
+    <string name="cancel">Download / Import abbrechen</string>
+    <string name="open_terms">Modellseite öffnen und Bedingungen akzeptieren</string>
+    <string name="model_details">Download: %1$.1f MB · %2$s</string>
+    <string name="gated_help">Persönliche Hugging-Face-Freigabe erforderlich. CC-BY-NC 4.0: nur nichtkommerzielle Nutzung mit Namensnennung. Auf der Modellseite Bedingungen akzeptieren, dann hier eigenen Lesetoken eingeben. Der Token wird nicht gespeichert.</string>
+    <string name="free_help">Kein Konto nötig. Nur Englisch; dieses Modell spricht kein Deutsch.</string>
+    <string name="token_hint">Optionaler eigener HF-Lesetoken (nur freigabepflichtige Modelle)</string>
+    <string name="installing_model">Modell wird installiert…</string>
+    <string name="download_background">Läuft im Hintergrund weiter. App für Fortschritt oder Abbruch öffnen.</string>
+    <string name="install_complete">Modell erfolgreich installiert und geladen.</string>
+    <string name="cancelled">Abgebrochen. Bisheriges Modell bleibt erhalten.</string>
+    <string name="preview_help">Vorschau über diese TTS-Engine. Tempo und Tonhöhe unabhängig: 50–200 %. Erster Tipp lädt Stimmen, zweiter liest vor. Stimme passend zur Textsprache wählen. Andere Apps bestimmen Tempo und Tonhöhe selbst.</string>
+    <string name="preview_rate">Vorschau-Tempo: %d%%</string>
+    <string name="preview_pitch">Vorschau-Tonhöhe: %d%%</string>
+    <string name="preview_text">Dies ist ein Beispiel für Sprachsynthese.</string>
+    <string name="preview">Stimmen laden / Vorschau sprechen</string>
+    <string name="preview_ready">Stimmen geladen. Für die Wiedergabe erneut auf Vorschau tippen.</string>
+    <string name="stop_preview">Vorschau stoppen</string>
+    <string name="licenses">Lizenzen (offline)</string>
+    <string name="about_fork">Phonon TTS 0.4.1-android.1 · Community-Fork von Zwiebelrostbraten auf Basis von gradium-ai/xn-ptts. CPU-Betrieb; Sprachsynthese vollständig offline auf diesem Gerät. Downloads kontaktieren Hugging Face nur auf Wunsch. Gleiche App-ID wie upstream; bei anderer Signatur kann vorheriges Deinstallieren nötig sein (App-Daten werden gelöscht). Android 7+, ARM64 mit dotprod/FP16 oder x86_64. Android-Laufzeit noch nicht getestet.</string>
+</resources>

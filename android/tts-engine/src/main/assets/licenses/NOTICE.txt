@@ -1,0 +1,19 @@
+Phonon TTS Android community fork
+https://github.com/Zwiebelrostbraten/phonon-tts-android
+Based on https://github.com/gradium-ai/xn-ptts (MIT OR Apache-2.0).
+Not an official Gradium release.
+
+Sonic by Bill Cox, Apache-2.0.
+Source: https://github.com/waywardgeek/sonic
+Pinned commit: b93885dcb70aae50c6f76b0fe4e0868f029a077e
+Sonic.java modified only to use package ai.gradium.phonon.tts.
+
+JNA 5.17.0: Apache-2.0 OR LGPL-2.1-or-later; used under Apache-2.0.
+https://github.com/java-native-access/jna
+
+Model weights are downloaded separately; they are not bundled in this APK.
+English: gradium/phonon-31m-en, Apache-2.0.
+German: gradium/phonon-40m-de, CC-BY-NC-4.0.
+Multilingual: gradium/phonon-40m-multilingual, CC-BY-NC-4.0.
+Model attribution: Gradium, https://huggingface.co/gradium
+Gated models require the user's own approval and read token.

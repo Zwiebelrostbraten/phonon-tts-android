@@ -3,9 +3,6 @@ plugins {
     id("org.jetbrains.kotlin.android") version "2.2.20"
 }
 
-val workspaceVersion = Regex("(?m)^version = \"([^\"]+)\"")
-    .find(file("../../Cargo.toml").readText())!!.groupValues[1]
-
 // The engine speaks through the same Kotlin wrapper apps copy, android/PhononTTS.kt, so it is
 // compiled from there rather than kept as a second copy.
 abstract class ShareWrapper : DefaultTask() {
@@ -27,8 +24,9 @@ android {
         applicationId = "ai.gradium.phonon.tts"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = workspaceVersion
+        ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
+        versionCode = 2
+        versionName = "0.4.1-android.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     // What android/build.sh writes.
@@ -50,6 +48,7 @@ android {
 kotlin { compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) } }
 
 dependencies {
+    testImplementation("junit:junit:4.13.2")
     implementation("net.java.dev.jna:jna:5.17.0@aar")
     androidTestImplementation("androidx.test:runner:1.6.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")

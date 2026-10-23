@@ -11,4 +11,27 @@
     <string name="ready">Ready.\nLanguages: %1$s\nVoices: %2$s</string>
     <string name="load_failed">The model failed to load: %1$s</string>
     <string name="import_failed">Import failed: %1$s</string>
+    <string name="english_free">English (free)</string>
+    <string name="german">German</string>
+    <string name="multilingual">Multilingual</string>
+    <string name="download">Download model</string>
+    <string name="cancel">Cancel download / import</string>
+    <string name="open_terms">Open model page and accept terms</string>
+    <string name="model_details">Download: %1$.1f MB · %2$s</string>
+    <string name="gated_help">Personal Hugging Face approval required. CC-BY-NC 4.0: non-commercial use only, with attribution. Accept the terms on the model page, then enter your own read token here. No token is saved.</string>
+    <string name="free_help">No account needed. English only; this model does not speak German.</string>
+    <string name="token_hint">Optional personal HF read token (gated models only)</string>
+    <string name="installing_model">Installing model…</string>
+    <string name="download_background">Continues in background. Open app for progress or cancel.</string>
+    <string name="install_complete">Model installed and loaded successfully.</string>
+    <string name="cancelled">Cancelled. Previous model retained.</string>
+    <string name="preview_help">Preview uses this TTS engine. Supported tempo and pitch: 50–200%, independently. First tap initializes voices; tap again to speak. Select a voice matching your text. System apps supply their own rate and pitch.</string>
+    <string name="preview_rate">Preview tempo: %d%%</string>
+    <string name="preview_pitch">Preview pitch: %d%%</string>
+    <string name="preview_text">This is an example of speech synthesis.</string>
+    <string name="preview">Load voices / Speak preview</string>
+    <string name="preview_ready">Voices loaded. Tap preview again to speak.</string>
+    <string name="stop_preview">Stop preview</string>
+    <string name="licenses">Offline licenses</string>
+    <string name="about_fork">Phonon TTS 0.4.1-android.1 · Community fork by Zwiebelrostbraten of gradium-ai/xn-ptts. CPU backend; all synthesis stays offline on this device. Downloads contact Hugging Face only when requested. Same app ID as upstream; different signing key may require uninstalling upstream first (app data will be removed). Android 7+, 64-bit ARM with dotprod/FP16, or x86_64. Runtime on Android has not yet been tested.</string>
 </resources>
