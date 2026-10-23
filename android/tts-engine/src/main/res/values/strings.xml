@@ -25,13 +25,12 @@
     <string name="download_background">Continues in background. Open app for progress or cancel.</string>
     <string name="install_complete">Model installed and loaded successfully.</string>
     <string name="cancelled">Cancelled. Previous model retained.</string>
-    <string name="preview_help">Preview uses this TTS engine. Supported tempo and pitch: 50–200%, independently. First tap initializes voices; tap again to speak. Select a voice matching your text. System apps supply their own rate and pitch.</string>
+    <string name="preview_help">Preview uses this TTS engine. Tempo: 50–200%. The first tap initializes voices and speaks when ready. Select a voice matching your text. Original voice pitch is preserved. Android’s system pitch slider cannot be removed by this engine; its pitch requests are ignored.</string>
     <string name="preview_rate">Preview tempo: %d%%</string>
-    <string name="preview_pitch">Preview pitch: %d%%</string>
     <string name="preview_text">This is an example of speech synthesis.</string>
     <string name="preview">Load voices / Speak preview</string>
     <string name="preview_ready">Voices loaded. Tap preview again to speak.</string>
     <string name="stop_preview">Stop preview</string>
     <string name="licenses">Offline licenses</string>
-    <string name="about_fork">Phonon TTS 0.4.1-android.1 · Community fork by Zwiebelrostbraten of gradium-ai/xn-ptts. CPU backend; all synthesis stays offline on this device. Downloads contact Hugging Face only when requested. Same app ID as upstream; different signing key may require uninstalling upstream first (app data will be removed). Android 7+, 64-bit ARM with dotprod/FP16, or x86_64. Runtime on Android has not yet been tested.</string>
+    <string name="about_fork">Phonon TTS 0.4.1-android.2 · Community fork by Zwiebelrostbraten of gradium-ai/xn-ptts. CPU backend; all synthesis stays offline on this device. Downloads contact Hugging Face only when requested. Same app ID as upstream; different signing key may require uninstalling upstream first (app data will be removed). Android 7+, 64-bit ARM with dotprod/FP16, or x86_64. Runtime on Android has not yet been tested.</string>
 </resources>

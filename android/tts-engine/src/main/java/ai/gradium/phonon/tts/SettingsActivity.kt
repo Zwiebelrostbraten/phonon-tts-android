@@ -86,7 +86,6 @@ class SettingsActivity : Activity() {
         val voices = android.widget.Spinner(this).apply { add(this) }
         var availableVoices = emptyList<android.speech.tts.Voice>()
         var rate = 100
-        var pitch = 100
         fun slider(title: Int, changed: (Int) -> Unit) {
             val value = label(getString(title, 100))
             add(android.widget.SeekBar(this).apply {
@@ -100,7 +99,7 @@ class SettingsActivity : Activity() {
                 })
             })
         }
-        slider(R.string.preview_rate) { rate = it }; slider(R.string.preview_pitch) { pitch = it }
+        slider(R.string.preview_rate) { rate = it }
         val sample = android.widget.EditText(this).apply { setText(getString(R.string.preview_text)); add(this) }
         button(R.string.preview) {
             if (Model.state !is Model.State.Ready || Model.installing) {
@@ -109,7 +108,6 @@ class SettingsActivity : Activity() {
             }
             val requestedText = sample.text.toString()
             val requestedRate = rate / 100f
-            val requestedPitch = pitch / 100f
             val requestedVoice = availableVoices.getOrNull(voices.selectedItemPosition)
             val speakRequested = {
                 val engine = preview
@@ -117,7 +115,7 @@ class SettingsActivity : Activity() {
                     // A model may have no optional voice embeddings; use its default in that case.
                     val voice = requestedVoice ?: availableVoices.getOrNull(voices.selectedItemPosition)
                     if (voice != null) { engine.language = voice.locale; engine.voice = voice }
-                    engine.setSpeechRate(requestedRate); engine.setPitch(requestedPitch)
+                    engine.setSpeechRate(requestedRate); engine.setPitch(1f)
                     engine.speak(requestedText, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, "preview")
                 }
                 Unit

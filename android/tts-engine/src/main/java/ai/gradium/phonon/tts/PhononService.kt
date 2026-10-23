@@ -86,7 +86,7 @@ class PhononService : TextToSpeechService() {
             callback.done()
             return
         }
-        val audio = SpeechAudio(request.speechRate, request.pitch, callback.maxBufferSize) { bytes, n ->
+        val audio = SpeechAudio(request.speechRate, 100, callback.maxBufferSize) { bytes, n ->
             !stopped && callback.audioAvailable(bytes, 0, n) == TextToSpeech.SUCCESS
         }
         if (!audio.accepting) { fail(callback, TextToSpeech.ERROR_OUTPUT); return }

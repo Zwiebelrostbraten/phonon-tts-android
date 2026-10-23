@@ -25,13 +25,12 @@
     <string name="download_background">Läuft im Hintergrund weiter. App für Fortschritt oder Abbruch öffnen.</string>
     <string name="install_complete">Modell erfolgreich installiert und geladen.</string>
     <string name="cancelled">Abgebrochen. Bisheriges Modell bleibt erhalten.</string>
-    <string name="preview_help">Vorschau über diese TTS-Engine. Tempo und Tonhöhe unabhängig: 50–200 %. Erster Tipp lädt Stimmen, zweiter liest vor. Stimme passend zur Textsprache wählen. Andere Apps bestimmen Tempo und Tonhöhe selbst.</string>
+    <string name="preview_help">Vorschau über diese TTS-Engine. Tempo: 50–200 %. Der erste Tipp lädt Stimmen und liest vor, sobald die Engine bereit ist. Stimme passend zur Textsprache wählen. Die ursprüngliche Tonhöhe bleibt erhalten. Der Tonhöhenregler in Androids Systemeinstellungen kann von dieser Engine nicht entfernt werden; seine Anfragen werden ignoriert.</string>
     <string name="preview_rate">Vorschau-Tempo: %d%%</string>
-    <string name="preview_pitch">Vorschau-Tonhöhe: %d%%</string>
     <string name="preview_text">Dies ist ein Beispiel für Sprachsynthese.</string>
     <string name="preview">Stimmen laden / Vorschau sprechen</string>
     <string name="preview_ready">Stimmen geladen. Für die Wiedergabe erneut auf Vorschau tippen.</string>
     <string name="stop_preview">Vorschau stoppen</string>
     <string name="licenses">Lizenzen (offline)</string>
-    <string name="about_fork">Phonon TTS 0.4.1-android.1 · Community-Fork von Zwiebelrostbraten auf Basis von gradium-ai/xn-ptts. CPU-Betrieb; Sprachsynthese vollständig offline auf diesem Gerät. Downloads kontaktieren Hugging Face nur auf Wunsch. Gleiche App-ID wie upstream; bei anderer Signatur kann vorheriges Deinstallieren nötig sein (App-Daten werden gelöscht). Android 7+, ARM64 mit dotprod/FP16 oder x86_64. Android-Laufzeit noch nicht getestet.</string>
+    <string name="about_fork">Phonon TTS 0.4.1-android.2 · Community-Fork von Zwiebelrostbraten auf Basis von gradium-ai/xn-ptts. CPU-Betrieb; Sprachsynthese vollständig offline auf diesem Gerät. Downloads kontaktieren Hugging Face nur auf Wunsch. Gleiche App-ID wie upstream; bei anderer Signatur kann vorheriges Deinstallieren nötig sein (App-Daten werden gelöscht). Android 7+, ARM64 mit dotprod/FP16 oder x86_64. Android-Laufzeit noch nicht getestet.</string>
 </resources>

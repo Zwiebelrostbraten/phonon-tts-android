@@ -29,10 +29,18 @@ class FocusedTest {
         assertEquals(24000.0, out.size.toDouble(), 1000.0)
         assertEquals(220.0, frequency(out), 5.0)
     }
-    @Test fun independentPitch() {
-        val out = waveform(100, 150)
-        assertEquals(48000.0, out.size.toDouble(), 1000.0)
-        assertEquals(330.0, frequency(out), 8.0)
+    @Test fun pitchRequestsIgnoredAtEveryTempo() {
+        for (rate in listOf(50, 100, 200)) {
+            val original = waveform(rate, 100)
+            assertEquals(48000.0 * 100 / rate, original.size.toDouble(), 1000.0)
+            assertEquals(220.0, frequency(original), 5.0)
+            for (pitch in listOf(Int.MIN_VALUE, 0, 50, 150, 200, Int.MAX_VALUE)) {
+                val out = waveform(rate, pitch)
+                assertArrayEquals("pitch=$pitch rate=$rate", original, out)
+                val audio = SpeechAudio(rate, pitch, 4096) { _, _ -> true }
+                assertEquals(1f, audio.effectivePitch, 0f)
+            }
+        }
     }
     @Test fun mappingAndPassthrough() {
         assertEquals(0.5f, SpeechAudio.factor(1), 0f)

@@ -3,9 +3,11 @@ package ai.gradium.phonon.tts
 import kotlin.math.roundToInt
 
 /** Per-request, bounded streaming PCM processor. Android retains ownership of playback. */
+@Suppress("UNUSED_PARAMETER")
 class SpeechAudio(rate: Int, pitch: Int, maxBytes: Int, private val send: (ByteArray, Int) -> Boolean) {
     val effectiveRate = factor(rate)
-    val effectivePitch = factor(pitch)
+    // Android pitch requests are deliberately ignored to preserve the original voice.
+    val effectivePitch = 1f
     private val capacity = minOf(maxBytes and -2, 8192)
     private val sonic = if (effectiveRate == 1f && effectivePitch == 1f) null else Sonic(24000, 1).apply {
         setSpeed(effectiveRate)
