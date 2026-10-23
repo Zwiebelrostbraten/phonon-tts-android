@@ -18,9 +18,9 @@
     <string name="cancel">Cancel download / import</string>
     <string name="open_terms">Open model page and accept terms</string>
     <string name="model_details">Download: %1$.1f MB · %2$s</string>
-    <string name="gated_help">Personal Hugging Face approval required. CC-BY-NC 4.0: non-commercial use only, with attribution. Accept the terms on the model page, then enter your own read token here. No token is saved.</string>
+    <string name="gated_help">Personal Hugging Face approval required. CC-BY-NC 4.0: non-commercial use only, with attribution. Accept the terms on the model page, then enter your own read token here. “Token speichern” or starting a gated download saves it encrypted for reuse. An empty field does not mean the saved token was deleted; use “Gespeicherten Token löschen” to delete it. Reenter a token that older versions never saved once.</string>
     <string name="free_help">No account needed. English only; this model does not speak German.</string>
-    <string name="token_hint">Optional personal HF read token (gated models only)</string>
+    <string name="token_hint">Saved HF token is reused; enter a token to optionally replace it</string>
     <string name="installing_model">Installing model…</string>
     <string name="download_background">Continues in background. Open app for progress or cancel.</string>
     <string name="install_complete">Model installed and loaded successfully.</string>
@@ -32,5 +32,5 @@
     <string name="preview_ready">Voices loaded. Tap preview again to speak.</string>
     <string name="stop_preview">Stop preview</string>
     <string name="licenses">Offline licenses</string>
-    <string name="about_fork">Phonon TTS 0.4.1-android.2 · Community fork by Zwiebelrostbraten of gradium-ai/xn-ptts. CPU backend; all synthesis stays offline on this device. Downloads contact Hugging Face only when requested. Same app ID as upstream; different signing key may require uninstalling upstream first (app data will be removed). Android 7+, 64-bit ARM with dotprod/FP16, or x86_64. Runtime on Android has not yet been tested.</string>
+    <string name="about_fork">Phonon TTS 0.4.1-android.3 · Community fork by Zwiebelrostbraten of gradium-ai/xn-ptts. CPU backend; all synthesis stays offline on this device. Downloads contact Hugging Face only when requested. Same app ID as upstream; different signing key may require uninstalling upstream first (app data will be removed). Android 7+, 64-bit ARM with dotprod/FP16, or x86_64. Runtime on Android has not yet been tested.</string>
 </resources>

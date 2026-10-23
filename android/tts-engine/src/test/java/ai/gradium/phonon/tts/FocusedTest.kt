@@ -7,6 +7,24 @@ import kotlin.math.PI
 import kotlin.math.sin
 
 class FocusedTest {
+    @Test fun tokenEncryptionRoundTripAndTamperRejection() {
+        val key = javax.crypto.KeyGenerator.getInstance("AES").apply { init(256) }.generateKey()
+        val encrypted = TokenEnvelope.seal("synthetic-test-token", key)
+        assertEquals("synthetic-test-token", TokenEnvelope.open(encrypted, key))
+        assertFalse(String(encrypted, Charsets.ISO_8859_1).contains("synthetic-test-token"))
+        assertFalse(encrypted.contentEquals(TokenEnvelope.seal("synthetic-test-token", key)))
+        encrypted[encrypted.lastIndex] = (encrypted.last().toInt() xor 1).toByte()
+        try { TokenEnvelope.open(encrypted, key); fail("Tampering accepted") } catch (_: javax.crypto.AEADBadTagException) {}
+    }
+    @Test fun failedTokenEncryptionPreservesPreviousCiphertext() {
+        var stored = byteArrayOf(42)
+        val writer = TokenWriter({ throw IllegalStateException("Unavailable key") }, { stored = it })
+        try { writer.save("replacement"); fail("Must fail") } catch (_: IllegalStateException) {}
+        assertArrayEquals(byteArrayOf(42), stored)
+        TokenWriter({ byteArrayOf(7, 8) }, { stored = it }).save("replacement")
+        assertArrayEquals(byteArrayOf(7, 8), stored)
+    }
+
     private fun waveform(rate: Int, pitch: Int): ShortArray {
         val samples = ArrayList<Short>()
         val audio = SpeechAudio(rate, pitch, 4095) { bytes, n ->

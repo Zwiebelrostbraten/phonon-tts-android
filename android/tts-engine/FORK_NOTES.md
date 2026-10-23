@@ -1,5 +1,7 @@
 # Android fork implementation notes
 
+Current status: **0.4.1-android.3**, versionCode **4**, with encrypted persistent HF tokens and 13 bundled public German voice embeddings. See the .3 section below and the latest delivery refresh at the end. Earlier build records and implementation claims describe historical versions; memory-only/no-storage token claims and .1/.2 version references do not describe the current app.
+
 Base: upstream `6fc8b65f7e71146517098aa428c8cfa135b4fcb5` in the existing community fork. No new engine or renamed upstream ownership claim. No commits, pushes, GitHub API calls, emulator, CI runs or broad test suite performed for this task. Rust sources, Cargo files, native build script and shared Kotlin wrapper were left unchanged. The native CPU build is complete; both real ABI libraries are packaged and verified.
 
 Implemented in the existing `android/tts-engine` app:
@@ -59,3 +61,98 @@ Removed the preview pitch slider; tempo remains 50–200%. Preview resets pitch 
 Regression checks compare PCM byte-for-byte across extreme pitch requests at 50%, 100% and 200% tempo, and check duration and original 220 Hz frequency. The new regression failed before the fix (RED).
 
 GREEN: package-preview.sh completed assembleDebug and all 7 focused JVM tests (0 failures/errors/skips). New APK: `/opt/data/projects/Phonon-TTS-v0.4.1-android.2-debug.apk`; SHA-256 `7bbf716e737832a7db3f9b989b4d1b725e4a006ff93c00f092c069e94ceea05f` (matching `.sha256` sidecar). apksigner verified both APKs; certificate SHA-256 unchanged: `63e64d670aced1303b1b8cabbdfe879e99c7c9396891c2662970cc3c82d856d0`. All 4 packaged native libraries are byte-identical to .1. Logs: `/opt/data/profiles/mrs_patmore/cache/scratch/phonon-pitch`. No emulator, review, full suite, CI, commit, push or GitHub API.
+
+## 0.4.1-android.3: bundled voices and persistent token (2026-10-23)
+
+This section supersedes the earlier memory-only token behavior. VersionName is
+`0.4.1-android.3`, versionCode `4`. Application ID remains `ai.gradium.phonon.tts`.
+The existing Android Debug certificate is retained; SHA-256 is
+`63e64d670aced1303b1b8cabbdfe879e99c7c9396891c2662970cc3c82d856d0`.
+Update in place; do not uninstall/reset data or change signing keys.
+
+Bundled pack: 13 unmodified public German voice embeddings, 3,329,768 bytes,
+from `gradium/phonon-voices`, pinned revision
+`0ee17205f254b5abc43b266c8a0f215565c352f7`, Apache-2.0. The source/APK manifest
+`src/main/assets/german-voices/manifest.json` contains individual sizes, real LFS
+SHA-256 digests, original IDs/filenames, names, revision and attribution. Its own
+SHA-256 is `9c1d108074d47f4af87256eea9d1749c0bf615cbf1219a8e8a79acf533cae83d`.
+Offline license/attribution is in `licenses/German-Voices-NOTICE.txt` and the
+existing Apache license. No gated model weights are bundled.
+
+The pack is added before native validation of a staged install and before opening
+an existing checkpoint's native handle. Config language support gates installation;
+English 31m does not acquire German support. Installed embeddings use a namespace
+with full content hashes, preserve imported/default files and are verified again.
+Each file is synced to an ignored .part file then atomically renamed (also on API
+24), with no whole-model copy. Load/install lifecycle and existing synthesis locks
+remain in use; existing active native handles are never mutated. Existing German
+and multilingual checkpoints get the pack on next process/model load without a
+model download or token. The native-loaded embeddings determine the voice list.
+Bundled voices are exposed as human names in Android and in the immediately ready
+settings picker, which refreshes after model changes. Selection persists per
+language, with validation/fallback after model changes; explicit client voice
+requests take precedence. Tempo remains enabled and pitch remains disabled.
+
+Token storage: AndroidKeyStore AES/GCM, versioned authenticated envelope and atomic
+ciphertext replacement in noBackupFilesDir. Explicit save or entering a token when
+starting a gated download saves it once. The masked input is not prefilled; storage
+status and explicit deletion are available. Backgrounding/model changes/downloads
+clear only UI text, never the encrypted token. Failed encryption leaves the previous
+ciphertext intact; key/decryption failures are surfaced with reentry/delete guidance
+without silently erasing ciphertext or models. Explicit deletion removes the key as
+well so a permanently invalidated key can be replaced. Ordinary same-signature APK
+updates preserve the stored token; uninstall/data clear removes it. Tokens never
+saved by previous versions cannot be recovered and require one initial reentry.
+
+Changed data boundaries: only trusted, pinned bundled assets enter private checkpoint
+storage, with size/hash checks and no new external download service. Existing HTTPS
+HF-only authorization and stripped CDN authorization remain unchanged. The token is
+absent from plain preferences, saved activity state, Intents, logs, assets and backups.
+Only voice preferences use ordinary private preferences. No new permissions or
+exported endpoints; InstallService remains unexported, Android TTS remains public
+as required, allowBackup remains false. No scanner upload, security bypass, identity
+change or attempt to suppress Play Protect was made. The handset warning requires
+the exact screenshot to distinguish an unfamiliar-app warning from an actual detection;
+it is not diagnosed or claimed fixed. No assertion of malware freedom is made.
+
+Validation: sourced `/opt/data/android-env.sh`, then `package-preview.sh` executed
+`assembleDebug testDebugUnitTest --tests ai.gradium.phonon.tts.FocusedTest`.
+BUILD SUCCESSFUL; 9 JVM tests, 0 failures/errors/skips. The existing seven waveform,
+download-policy/integrity and checkpoint transaction tests are retained. Two focused
+additions cover AES/GCM round-trip/random IV/tamper rejection and the injectable
+storage writer's encrypt-before-replacement/failure preservation. These are host JVM
+checks, not proof of AndroidKeyStore or Android update/lifecycle persistence.
+The packaging gate verified all 13 actual packaged sizes/digests and manifest,
+licenses, native ELF architecture and JNA libraries. Four native .so files are
+byte-identical to .2; no Rust/JNA native rebuild. apksigner verified the same certificate,
+package metadata is unchanged ID/versionCode 4, and 16 KiB zipalign passed.
+No emulator, device tests, lint, broad suite, CI, commit, push, GitHub API or publication.
+Phone preview, native German synthesis, actual KeyStore/update persistence and the
+handset/Play Protect warning remain unverified, for the user's phone test.
+
+Final artifact: `/opt/data/projects/Phonon-TTS-v0.4.1-android.3-debug.apk`
+(20,855,698 bytes).
+SHA-256: `b2ae17e27819e50561d34a3c463bf2eb62eb123be0bd9ecbf1527cceeb2c7ac0`.
+Sidecar: `/opt/data/projects/Phonon-TTS-v0.4.1-android.3-debug.apk.sha256`.
+Previous .1/.2 artifacts preserved. Build log:
+`/opt/data/profiles/mrs_patmore/cache/scratch/phonon-android3-build.log`;
+signature record: `/opt/data/profiles/mrs_patmore/cache/scratch/phonon-android3/signature.txt`.
+
+
+## .3 delivery wording refresh (2026-10-23)
+
+English/German help and token hints now describe encrypted persistence, reuse,
+optional replacement, the empty input, explicit deletion and one initial reentry
+for tokens never saved by older versions. About text and the module README now
+describe .3, including bundled voices and persisted per-language selection.
+Historical records above are retained. The module-local .gitignore exception
+allows only src/main/assets/german-voices/*.safetensors; model weights remain
+ignored. No staging, commits or pushes were performed.
+
+Only the existing package-preview.sh was run: BUILD SUCCESSFUL in 1s,
+45 actionable tasks (8 executed, 37 up-to-date). The focused 9-test task was
+up-to-date; its existing XML reports 9 tests, 0 failures/errors/skips. The script
+verified packaged embeddings, licenses and native libraries and refreshed the
+final .3 APK and .sha256 sidecar listed above. No functionality, permissions or
+signing configuration changed; no additional tests, CI, emulator or review ran.
+Build log: /opt/data/profiles/mrs_patmore/cache/scratch/phonon-android3-claims-build.log.

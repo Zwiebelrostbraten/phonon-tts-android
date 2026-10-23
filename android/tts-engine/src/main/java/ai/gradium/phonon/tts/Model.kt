@@ -64,8 +64,12 @@ object Model {
      */
     fun languages(context: Context): List<String> {
         if (!installed(context)) return emptyList()
+        return checkpointLanguages(dir(context))
+    }
+
+    private fun checkpointLanguages(checkpoint: File): List<String> {
         val listed = try {
-            JSONObject(File(dir(context), "config.json").readText()).optJSONArray("languages")
+            JSONObject(File(checkpoint, "config.json").readText()).optJSONArray("languages")
         } catch (e: Exception) {
             null
         }
@@ -91,6 +95,7 @@ object Model {
                 // core is too many on phones that mix fast and slow cores. A value already set wins.
                 Os.setenv("RAYON_NUM_THREADS", THREADS.toString(), false)
                 // Text is normalized per request with setLanguage; this is only the first one.
+                BundledVoices.install(context, File(dir), languages)
                 val tts = PhononTTS(dir, languages.firstOrNull() ?: "none")
                 State.Ready(Loaded(tts, tts.voices, languages))
             } catch (t: Throwable) {
@@ -130,6 +135,7 @@ object Model {
             require(File(staging, "model.q8.gguf").isFile || File(staging, "model.safetensors").isFile) {
                 "Missing model weights"
             }
+            BundledVoices.install(context, staging, checkpointLanguages(staging))
             // Validate the actual native checkpoint before touching the installed model.
             Os.setenv("RAYON_NUM_THREADS", THREADS.toString(), false)
             PhononTTS(staging.path, "none").use { it.voices }

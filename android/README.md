@@ -130,3 +130,20 @@ These routes have not been tested here yet; the Kotlin wrapper and the C interfa
 
 To run Phonon in a WebView instead, use the [`phonon-tts`](../ptts-wasm/js/README.md) npm package,
 which runs the same model as WebAssembly.
+
+### Android fork update 0.4.1-android.3
+
+The engine APK includes 13 public Apache-2.0 German voice embeddings (not gated
+model weights). Existing German/multilingual checkpoints gain them on the next
+load without downloading the model again. The English checkpoint remains English.
+The picker remembers a default per language; explicit client voices take precedence.
+
+HF tokens can now be saved with the masked input's “Token speichern” button;
+starting a gated download with a new token also saves it. AndroidKeyStore AES/GCM
+and atomic ciphertext in `noBackupFilesDir` replace the former memory-only behavior.
+The input is not prefilled. Model changes, backgrounding and normal updates keep
+the saved token; “Gespeicherten Token löschen” removes it. Invalidated keys require
+reentry (explicit deletion and saving again if necessary), without deleting models.
+A previously unsaved token cannot be recovered and must be entered once. Uninstall
+or app-data clearing removes it; update in place with the same signing certificate.
+See `tts-engine/RELEASE_NOTES.md` for this build's limitations.

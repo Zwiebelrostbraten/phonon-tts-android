@@ -1,0 +1,9 @@
+German voice embeddings: Gradium / phonon-voices contributors.
+Source: https://huggingface.co/gradium/phonon-voices
+Pinned revision: 0ee17205f254b5abc43b266c8a0f215565c352f7
+License: Apache License 2.0 (see LICENSE-APACHE).
+13 unmodified public embeddings, 3,329,768 bytes total. No gated model weights.
+Names: Nele, Jette, Annika, Jule, Lotta, Josefine, Svea, Anton, Mirko, Mats, Henrik, Leon, Mika.
+The APK includes german-voices/manifest.json with source filenames, IDs, attribution,
+revision, exact byte sizes and SHA-256 digests. Local filenames use the voice names;
+installed names include a Gradium namespace and the full content digest.

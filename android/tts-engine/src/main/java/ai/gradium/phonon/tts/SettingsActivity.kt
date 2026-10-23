@@ -29,6 +29,20 @@ class SettingsActivity : Activity() {
     private lateinit var models: android.widget.Spinner
     private var preview: android.speech.tts.TextToSpeech? = null
     private var previewReady = false
+    private lateinit var voicePicker: android.widget.Spinner
+    private var voiceChoices = emptyList<Pair<String, String>>()
+    private var shownModel: Model.Loaded? = null
+    private lateinit var tokenStatus: TextView
+    private val tokenStore by lazy { TokenStore(applicationContext) }
+    private fun updateTokenStatus() {
+        tokenStatus.text = try {
+            if (tokenStore.read() != null) "Token gespeichert (verschlüsselt)" else "Kein Token gespeichert"
+        } catch (_: Exception) { "Gespeicherter Token nicht lesbar. Token erneut eingeben und speichern; bei Bedarf gespeicherten Token löschen." }
+    }
+    private fun saveToken(): Boolean = try {
+        tokenStore.save(token.text.toString().trim())
+        token.text.clear(); updateTokenStatus(); true
+    } catch (_: Exception) { tokenStatus.text = "Token konnte nicht verschlüsselt gespeichert werden. Bitte erneut versuchen."; false }
     private var pendingPreview: (() -> Unit)? = null
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private val poll = object : Runnable {
@@ -57,6 +71,13 @@ class SettingsActivity : Activity() {
             if (android.os.Build.VERSION.SDK_INT >= 26) importantForAutofill = android.view.View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
             add(this)
         }
+        tokenStatus = label("")
+        updateTokenStatus()
+        Button(this).apply { text = "Token speichern"; setOnClickListener { saveToken() }; add(this) }
+        Button(this).apply { text = "Gespeicherten Token löschen"; setOnClickListener {
+            try { tokenStore.delete(); token.text.clear(); updateTokenStatus() }
+            catch (_: Exception) { tokenStatus.text = "Token-Schlüssel konnte nicht gelöscht werden. Bitte erneut versuchen." }
+        }; add(this) }
         val terms = button(R.string.open_terms) {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(ModelCatalog.all[models.selectedItemPosition].page)))
         }
@@ -73,7 +94,9 @@ class SettingsActivity : Activity() {
         }
         downloadButton = button(R.string.download) {
             val model = ModelCatalog.all[models.selectedItemPosition]
-            val readToken = token.text.toString().trim().takeIf { model.gated && it.isNotEmpty() }
+            if (model.gated && token.text.isNotBlank() && !saveToken()) return@button
+            val readToken = try { if (model.gated) tokenStore.read() else null }
+                catch (_: Exception) { updateTokenStatus(); return@button }
             token.text.clear()
             val app = applicationContext
             InstallService.start(this) { InstallService.download(app, model, readToken) }
@@ -84,7 +107,13 @@ class SettingsActivity : Activity() {
         button(R.string.system_settings) { startActivity(Intent("com.android.settings.TTS_SETTINGS")) }
         label(getString(R.string.preview_help))
         val voices = android.widget.Spinner(this).apply { add(this) }
-        var availableVoices = emptyList<android.speech.tts.Voice>()
+        voicePicker = voices
+        voices.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
+                voiceChoices.getOrNull(position)?.let { (lang, speaker) -> BundledVoices.select(this@SettingsActivity, lang, speaker) }
+            }
+        }
         var rate = 100
         fun slider(title: Int, changed: (Int) -> Unit) {
             val value = label(getString(title, 100))
@@ -108,13 +137,16 @@ class SettingsActivity : Activity() {
             }
             val requestedText = sample.text.toString()
             val requestedRate = rate / 100f
-            val requestedVoice = availableVoices.getOrNull(voices.selectedItemPosition)
+            val requestedVoice = voiceChoices.getOrNull(voices.selectedItemPosition)
             val speakRequested = {
                 val engine = preview
                 if (previewReady && engine != null && Model.state is Model.State.Ready && !Model.installing) {
                     // A model may have no optional voice embeddings; use its default in that case.
-                    val voice = requestedVoice ?: availableVoices.getOrNull(voices.selectedItemPosition)
-                    if (voice != null) { engine.language = voice.locale; engine.voice = voice }
+                    val choice = requestedVoice ?: voiceChoices.getOrNull(voices.selectedItemPosition)
+                    if (choice != null) {
+                        val voice = engine.voices?.firstOrNull { it.name == BundledVoices.androidName(choice.first, choice.second) }
+                        if (voice != null) { engine.language = voice.locale; engine.voice = voice }
+                    }
                     engine.setSpeechRate(requestedRate); engine.setPitch(1f)
                     engine.speak(requestedText, android.speech.tts.TextToSpeech.QUEUE_FLUSH, null, "preview")
                 }
@@ -128,8 +160,6 @@ class SettingsActivity : Activity() {
                         if (!isFinishing && !isDestroyed) {
                             previewReady = result == android.speech.tts.TextToSpeech.SUCCESS
                             if (previewReady) {
-                                availableVoices = preview?.voices?.filter { !it.isNetworkConnectionRequired }?.sortedBy { it.name }.orEmpty()
-                                voices.adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, availableVoices.map { it.name })
                                 status.text = getString(R.string.preview_ready)
                             } else {
                                 preview?.shutdown(); preview = null
@@ -150,7 +180,7 @@ class SettingsActivity : Activity() {
         label(getString(R.string.import_help))
         label(getString(R.string.about_fork))
         button(R.string.licenses) {
-            val names = listOf("LICENSE-MIT", "LICENSE-APACHE", "Sonic-LICENSE.txt", "NOTICE.txt")
+            val names = listOf("LICENSE-MIT", "LICENSE-APACHE", "Sonic-LICENSE.txt", "NOTICE.txt", "German-Voices-NOTICE.txt")
             val text = names.joinToString("\n\n") { name -> name + "\n" + assets.open("licenses/$name").bufferedReader().use { it.readText() } }
             val view = TextView(this).apply { this.text = text; setPadding(pad, pad, pad, pad); setTextIsSelectable(true) }
             android.app.AlertDialog.Builder(this).setTitle(R.string.licenses)
@@ -182,6 +212,21 @@ class SettingsActivity : Activity() {
 
     private fun refresh() {
         val busy = InstallService.running || Model.installing
+        val loaded = (Model.state as? Model.State.Ready)?.model
+        if (loaded !== shownModel) {
+            pendingPreview = null; preview?.stop(); preview?.shutdown(); preview = null; previewReady = false
+            shownModel = loaded
+            voiceChoices = loaded?.languages?.flatMap { lang ->
+                BundledVoices.speakers(loaded, lang).ifEmpty { listOf("default") }.map { lang to it }
+            }.orEmpty()
+            val selected = loaded?.let { model -> voiceChoices.indexOfFirst { (lang, speaker) ->
+                speaker == BundledVoices.selected(this, model, lang)
+            } } ?: -1
+            voicePicker.adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item,
+                voiceChoices.map { (lang, speaker) -> "${BundledVoices.label(speaker)} ($lang)" })
+            if (selected >= 0) voicePicker.setSelection(selected)
+        }
+        voicePicker.isEnabled = loaded != null && !busy
         importButton.isEnabled = !busy
         downloadButton.isEnabled = !busy
         models.isEnabled = !busy
@@ -189,7 +234,7 @@ class SettingsActivity : Activity() {
             is Model.State.NotInstalled -> getString(R.string.not_installed)
             is Model.State.Loading -> getString(R.string.loading)
             is Model.State.Failed -> getString(R.string.load_failed, s.message)
-            is Model.State.Ready -> getString(R.string.ready, s.model.languages.joinToString(", "), s.model.speakers.joinToString(", ").ifEmpty { "-" })
+            is Model.State.Ready -> getString(R.string.ready, s.model.languages.joinToString(", "), s.model.speakers.joinToString(", ") { BundledVoices.label(it) }.ifEmpty { "-" })
         }
     }
 

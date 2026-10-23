@@ -47,7 +47,7 @@ class PhononService : TextToSpeechService() {
 
     override fun onGetVoices(): List<Voice> {
         val model = Model.await(this) ?: return emptyList()
-        return model.languages.flatMap { lang -> speakers(model).map { voice(lang, it) } }
+        return model.languages.flatMap { lang -> speakers(model, lang).map { voice(lang, it) } }
     }
 
     override fun onIsValidVoiceName(voiceName: String?): Int =
@@ -59,7 +59,7 @@ class PhononService : TextToSpeechService() {
         val code = Model.code(lang) ?: return null
         val model = Model.await(this) ?: return null
         if (code !in model.languages) return null
-        return name(code, model.defaultSpeaker ?: NO_SPEAKER)
+        return name(code, BundledVoices.selected(this, model, code) ?: NO_SPEAKER)
     }
 
     override fun onStop() {
@@ -75,7 +75,7 @@ class PhononService : TextToSpeechService() {
         }
         // A voice the request names wins; otherwise its language, spoken by the default voice.
         val (lang, speaker) = parse(request.voiceName)
-            ?: Model.code(request.language)?.takeIf { it in model.languages }?.let { it to model.defaultSpeaker }
+            ?: Model.code(request.language)?.takeIf { it in model.languages }?.let { it to BundledVoices.selected(this, model, it) }
             ?: run {
                 fail(callback, TextToSpeech.ERROR_INVALID_REQUEST)
                 return
@@ -112,9 +112,9 @@ class PhononService : TextToSpeechService() {
     }
 
     /** The speakers to offer: the checkpoint's voices, or one stand-in when it has none. */
-    private fun speakers(model: Model.Loaded) = model.speakers.ifEmpty { listOf(NO_SPEAKER) }
+    private fun speakers(model: Model.Loaded, lang: String) = BundledVoices.speakers(model, lang).ifEmpty { listOf(NO_SPEAKER) }
 
-    private fun name(lang: String, speaker: String) = "$lang-$speaker"
+    private fun name(lang: String, speaker: String) = BundledVoices.androidName(lang, speaker)
 
     private fun voice(lang: String, speaker: String) = Voice(
         name(lang, speaker), Locale.forLanguageTag(lang), Voice.QUALITY_HIGH, Voice.LATENCY_LOW, false, emptySet(),
@@ -122,10 +122,13 @@ class PhononService : TextToSpeechService() {
 
     /** A voice name as [name] writes it, to its language and speaker, or null if not ours. */
     private fun parse(voiceName: String?): Pair<String, String?>? {
-        val (lang, speaker) = voiceName?.split('-', limit = 2)?.takeIf { it.size == 2 } ?: return null
         val model = Model.await(this) ?: return null
-        if (lang !in model.languages || speaker !in speakers(model)) return null
-        return lang to speaker.takeIf { it in model.speakers }
+        for (lang in model.languages) for (speaker in speakers(model, lang)) {
+            if (name(lang, speaker) == voiceName || "$lang-$speaker" == voiceName) {
+                return lang to speaker.takeIf { it in model.speakers }
+            }
+        }
+        return null
     }
 
     private companion object {

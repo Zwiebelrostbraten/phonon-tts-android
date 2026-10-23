@@ -18,9 +18,9 @@
     <string name="cancel">Download / Import abbrechen</string>
     <string name="open_terms">Modellseite öffnen und Bedingungen akzeptieren</string>
     <string name="model_details">Download: %1$.1f MB · %2$s</string>
-    <string name="gated_help">Persönliche Hugging-Face-Freigabe erforderlich. CC-BY-NC 4.0: nur nichtkommerzielle Nutzung mit Namensnennung. Auf der Modellseite Bedingungen akzeptieren, dann hier eigenen Lesetoken eingeben. Der Token wird nicht gespeichert.</string>
+    <string name="gated_help">Persönliche Hugging-Face-Freigabe erforderlich. CC-BY-NC 4.0: nur nichtkommerzielle Nutzung mit Namensnennung. Auf der Modellseite Bedingungen akzeptieren, dann hier eigenen Lesetoken eingeben. „Token speichern“ oder der Start eines freigabepflichtigen Downloads speichert ihn verschlüsselt zur Wiederverwendung. Ein leeres Feld bedeutet nicht, dass der gespeicherte Token gelöscht wurde; dafür „Gespeicherten Token löschen“ verwenden. Einen von älteren Versionen nie gespeicherten Token einmal erneut eingeben.</string>
     <string name="free_help">Kein Konto nötig. Nur Englisch; dieses Modell spricht kein Deutsch.</string>
-    <string name="token_hint">Optionaler eigener HF-Lesetoken (nur freigabepflichtige Modelle)</string>
+    <string name="token_hint">Gespeicherter HF-Token wird verwendet; Eingabe zum optionalen Ersetzen</string>
     <string name="installing_model">Modell wird installiert…</string>
     <string name="download_background">Läuft im Hintergrund weiter. App für Fortschritt oder Abbruch öffnen.</string>
     <string name="install_complete">Modell erfolgreich installiert und geladen.</string>
@@ -32,5 +32,5 @@
     <string name="preview_ready">Stimmen geladen. Für die Wiedergabe erneut auf Vorschau tippen.</string>
     <string name="stop_preview">Vorschau stoppen</string>
     <string name="licenses">Lizenzen (offline)</string>
-    <string name="about_fork">Phonon TTS 0.4.1-android.2 · Community-Fork von Zwiebelrostbraten auf Basis von gradium-ai/xn-ptts. CPU-Betrieb; Sprachsynthese vollständig offline auf diesem Gerät. Downloads kontaktieren Hugging Face nur auf Wunsch. Gleiche App-ID wie upstream; bei anderer Signatur kann vorheriges Deinstallieren nötig sein (App-Daten werden gelöscht). Android 7+, ARM64 mit dotprod/FP16 oder x86_64. Android-Laufzeit noch nicht getestet.</string>
+    <string name="about_fork">Phonon TTS 0.4.1-android.3 · Community-Fork von Zwiebelrostbraten auf Basis von gradium-ai/xn-ptts. CPU-Betrieb; Sprachsynthese vollständig offline auf diesem Gerät. Downloads kontaktieren Hugging Face nur auf Wunsch. Gleiche App-ID wie upstream; bei anderer Signatur kann vorheriges Deinstallieren nötig sein (App-Daten werden gelöscht). Android 7+, ARM64 mit dotprod/FP16 oder x86_64. Android-Laufzeit noch nicht getestet.</string>
 </resources>
