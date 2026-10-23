@@ -86,19 +86,25 @@ class PhononService : TextToSpeechService() {
             callback.done()
             return
         }
-        val audio = SpeechAudio(request.speechRate, 100, callback.maxBufferSize) { bytes, n ->
-            !stopped && callback.audioAvailable(bytes, 0, n) == TextToSpeech.SUCCESS
-        }
-        if (!audio.accepting) { fail(callback, TextToSpeech.ERROR_OUTPUT); return }
         try {
-            synchronized(model) {
+            val result = synchronized(model) {
                 check((Model.state as? Model.State.Ready)?.model === model) { "Model changed; retry request" }
                 model.tts.setLanguage(lang)
                 speaker?.let { model.tts.setVoice(it) }
-                model.tts.speak(text) { pcm -> !stopped && audio.write(pcm) }
+                SentenceSpeech(
+                    request.speechRate, callback.maxBufferSize, { stopped },
+                    { sentence, pcm -> model.tts.speak(sentence, pcm) },
+                    { bytes, n -> callback.audioAvailable(bytes, 0, n) == TextToSpeech.SUCCESS },
+                    { frame, start, end ->
+                        if (android.os.Build.VERSION.SDK_INT >= 26) callback.rangeStart(frame, start, end)
+                    },
+                ).speak(text, Locale.forLanguageTag(lang))
             }
-            if (!stopped && audio.finish()) callback.done()
-            else if (!stopped) fail(callback, TextToSpeech.ERROR_OUTPUT)
+            when (result) {
+                SentenceSpeech.Result.COMPLETE -> if (!stopped) callback.done()
+                SentenceSpeech.Result.OUTPUT_ERROR -> if (!stopped) fail(callback, TextToSpeech.ERROR_OUTPUT)
+                SentenceSpeech.Result.STOPPED -> Unit
+            }
         } catch (e: Exception) {
             Log.e(TAG, "synthesis failed", e)
             if (!stopped) fail(callback, TextToSpeech.ERROR_SYNTHESIS)

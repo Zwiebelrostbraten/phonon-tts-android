@@ -32,5 +32,5 @@
     <string name="preview_ready">Voices loaded. Tap preview again to speak.</string>
     <string name="stop_preview">Stop preview</string>
     <string name="licenses">Offline licenses</string>
-    <string name="about_fork">Phonon TTS 0.4.1-android.3 · Community fork by Zwiebelrostbraten of gradium-ai/xn-ptts. CPU backend; all synthesis stays offline on this device. Downloads contact Hugging Face only when requested. Same app ID as upstream; different signing key may require uninstalling upstream first (app data will be removed). Android 7+, 64-bit ARM with dotprod/FP16, or x86_64. Runtime on Android has not yet been tested.</string>
+    <string name="about_fork">Phonon TTS 0.4.1-android.4 · Community fork by Zwiebelrostbraten of gradium-ai/xn-ptts. CPU backend; all synthesis stays offline on this device. Downloads contact Hugging Face only when requested. Same app ID as upstream; different signing key may require uninstalling upstream first (app data will be removed). Android 7+, 64-bit ARM with dotprod/FP16, or x86_64. Runtime on Android has not yet been tested.</string>
 </resources>

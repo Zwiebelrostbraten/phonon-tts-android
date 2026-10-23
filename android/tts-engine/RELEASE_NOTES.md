@@ -1,3 +1,16 @@
+# 0.4.1-android.4 (versionCode 5)
+
+Die Engine meldet jetzt satzweise Textpositionen über Android rangeStart (API 26+).
+Originale UTF-16-Offsets und tatsächlich ausgegebene PCM-Frames nach Tempoanpassung
+bestimmen die Marker; keine geschätzten Wortzeiten und kein Timer. Sätze werden
+nacheinander synthetisiert, wodurch sich Pausen und Prosodie ändern können.
+Wortgenaues Alignment steht nicht zur Verfügung. API 24–25 spielt ohne Positionsmarker.
+Ob Kindle die Positionen anzeigt, muss auf dem Handy geprüft werden; keine bestätigte
+Kindle-Behebung. Tonhöhenänderungen bleiben deaktiviert.
+
+Update mit derselben Signatur erhält Modelle, Stimmen, Standardstimmen und Token.
+Paketname, native Bibliotheken und Berechtigungen bleiben unverändert.
+
 # 0.4.1-android.3 (versionCode 4)
 
 13 echte deutsche Gradium-Stimmen sind jetzt im APK enthalten: Nele, Jette,

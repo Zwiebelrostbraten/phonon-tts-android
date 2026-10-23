@@ -1,10 +1,10 @@
 # Phonon TTS — Android community fork
 
-This is the Android system TTS app from [gradium-ai/xn-ptts](https://github.com/gradium-ai/xn-ptts), extended in the [Zwiebelrostbraten community fork](https://github.com/Zwiebelrostbraten/phonon-tts-android). It is not an official Gradium Android release. App version: **0.4.1-android.3**, versionCode **4**. The upstream Rust workspace version is unchanged.
+This is the Android system TTS app from [gradium-ai/xn-ptts](https://github.com/gradium-ai/xn-ptts), extended in the [Zwiebelrostbraten community fork](https://github.com/Zwiebelrostbraten/phonon-tts-android). It is not an official Gradium Android release. App version: **0.4.1-android.4**, versionCode **5**. The upstream Rust workspace version is unchanged.
 
 ## Install and use
 
-1. Install `Phonon-TTS-v0.4.1-android.3-debug.apk`, allowing installation from your browser/file manager when Android asks. This preview is debug-signed. The app ID remains `ai.gradium.phonon.tts`; an upstream installation signed with another key must be uninstalled first, which removes its app data.
+1. Install `Phonon-TTS-v0.4.1-android.4-debug.apk`, allowing installation from your browser/file manager when Android asks. This preview is debug-signed. The app ID remains `ai.gradium.phonon.tts`; an upstream installation signed with another key must be uninstalled first, which removes its app data.
 2. Open **Phonon TTS**, choose a model, and tap **Download model / Modell herunterladen**. English needs no account. German and multilingual need personal Hugging Face approval: open the model page, accept the license, and enter your own HF read token **in the app**, never in an issue/chat. The token is encrypted with AndroidKeyStore AES/GCM and persisted in `noBackupFilesDir` when you tap **Token speichern** or start a gated download with a new token. A saved token is reused; entering another token optionally replaces it. The input stays empty after saving: an empty field does not mean deletion. Use **Gespeicherten Token löschen** to delete the saved token. A token never saved by earlier versions must be entered once again. Same-signature updates preserve it; uninstalling or clearing app data removes it. The download runs as a foreground operation; its notification reopens the app or cancels it.
 3. Wait for installation **and native loading** to succeed. Failed downloads, cancellation and failed activation retain the previous checkpoint. Only one model is installed at a time.
 4. Open the system text-to-speech settings using the app button, select **Phonon TTS** as the preferred engine, and choose a language the installed model supports. Apps using Android `TextToSpeech` then use this engine.
@@ -51,3 +51,9 @@ For manual preview packaging run `./android/tts-engine/package-preview.sh` from 
 Output: `build/outputs/apk/debug/phonon-tts-engine-debug.apk`. Verify that it contains **both** `lib/arm64-v8a/libptts_ffi.so` and `lib/x86_64/libptts_ffi.so`, JNA dispatch libraries and `assets/licenses/`. Debug signing is for preview testing; use a maintained private signing key for a production distribution.
 
 Focused JVM checks cover ignored pitch requests and independent waveform tempo, request percentage mapping, bounded/aligned output, token stripping, redirect policy, complete/hash validation and checkpoint rollback/crash recovery, plus AES/GCM integrity and storage replacement failure handling (9 focused JVM tests). These host checks do not verify AndroidKeyStore or update persistence on a device. No emulator or broad test suite is required. These checks do not establish Android runtime quality or native speech correctness. See [FORK_NOTES.md](FORK_NOTES.md) for the actual build results.
+
+Version .4 supplies sentence-level playback positions via Android API 26+ rangeStart.
+Markers use original UTF-16 text offsets and actual 24 kHz PCM frames after tempo
+processing. Each sentence is synthesized separately, which can change pauses/prosody.
+No word alignment is available; exact word highlighting is not claimed. API 24–25
+still plays speech without range notifications. Kindle behavior awaits phone testing.

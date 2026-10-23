@@ -25,8 +25,8 @@ android {
         minSdk = 24
         targetSdk = 36
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
-        versionCode = 4
-        versionName = "0.4.1-android.3"
+        versionCode = 5
+        versionName = "0.4.1-android.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     // What android/build.sh writes.
@@ -52,4 +52,9 @@ dependencies {
     implementation("net.java.dev.jna:jna:5.17.0@aar")
     androidTestImplementation("androidx.test:runner:1.6.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
+}
+
+// Keep focused-test temporary files in the caller's scratch directory.
+tasks.withType<Test>().configureEach {
+    System.getenv("TMPDIR")?.let { systemProperty("java.io.tmpdir", it) }
 }

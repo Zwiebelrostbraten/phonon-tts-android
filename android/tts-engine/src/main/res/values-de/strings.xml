@@ -32,5 +32,5 @@
     <string name="preview_ready">Stimmen geladen. Für die Wiedergabe erneut auf Vorschau tippen.</string>
     <string name="stop_preview">Vorschau stoppen</string>
     <string name="licenses">Lizenzen (offline)</string>
-    <string name="about_fork">Phonon TTS 0.4.1-android.3 · Community-Fork von Zwiebelrostbraten auf Basis von gradium-ai/xn-ptts. CPU-Betrieb; Sprachsynthese vollständig offline auf diesem Gerät. Downloads kontaktieren Hugging Face nur auf Wunsch. Gleiche App-ID wie upstream; bei anderer Signatur kann vorheriges Deinstallieren nötig sein (App-Daten werden gelöscht). Android 7+, ARM64 mit dotprod/FP16 oder x86_64. Android-Laufzeit noch nicht getestet.</string>
+    <string name="about_fork">Phonon TTS 0.4.1-android.4 · Community-Fork von Zwiebelrostbraten auf Basis von gradium-ai/xn-ptts. CPU-Betrieb; Sprachsynthese vollständig offline auf diesem Gerät. Downloads kontaktieren Hugging Face nur auf Wunsch. Gleiche App-ID wie upstream; bei anderer Signatur kann vorheriges Deinstallieren nötig sein (App-Daten werden gelöscht). Android 7+, ARM64 mit dotprod/FP16 oder x86_64. Android-Laufzeit noch nicht getestet.</string>
 </resources>

@@ -10,7 +10,7 @@ for abi in arm64-v8a x86_64; do
         exit 1
     }
 done
-"$APP_DIR/gradlew" -p "$APP_DIR" assembleDebug testDebugUnitTest --tests ai.gradium.phonon.tts.FocusedTest --console=plain
+"$APP_DIR/gradlew" -p "$APP_DIR" assembleDebug testDebugUnitTest --tests ai.gradium.phonon.tts.FocusedTest --tests ai.gradium.phonon.tts.ProgressTest --console=plain
 python3 - "$APP_DIR" "$ARTIFACT_DIR" <<'PY'
 import json, hashlib, pathlib, shutil, struct, sys, zipfile
 app, destination = map(pathlib.Path, sys.argv[1:])
@@ -34,7 +34,7 @@ with zipfile.ZipFile(apk) as archive:
     assert archive.getinfo('assets/licenses/German-Voices-NOTICE.txt').file_size > 100
     for name in ['LICENSE-MIT' ,'LICENSE-APACHE','Sonic-LICENSE.txt','NOTICE.txt']:
         assert archive.getinfo(f'assets/licenses/{name}').file_size > 100
-out = destination / 'Phonon-TTS-v0.4.1-android.3-debug.apk'
+out = destination / 'Phonon-TTS-v0.4.1-android.4-debug.apk'
 shutil.copy2(apk,out)
 sha = hashlib.sha256(out.read_bytes()).hexdigest()
 checksum = out.with_name(out.name + '.sha256')

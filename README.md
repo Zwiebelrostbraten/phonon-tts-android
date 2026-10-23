@@ -4,7 +4,7 @@
 
 ## Android community fork
 
-This fork extends the existing Android TTS app with model downloads, independent request speed/pitch controls and a debug APK preview, **Phonon TTS 0.4.1-android.1**. It is a community fork, not an official Gradium release. See the [Android app installation guide](android/tts-engine/README.md) for installation, engine selection, model licenses, ARM64 CPU requirements and the Kindle caveat. Android runtime testing is still pending; the upstream project documentation follows below.
+This fork extends the existing Android TTS app with model downloads, request speed control (pitch changes are disabled), sentence-level playback positions and a debug APK preview, **Phonon TTS 0.4.1-android.4**. It is a community fork, not an official Gradium release. See the [Android app installation guide](android/tts-engine/README.md) for installation, engine selection, model licenses, ARM64 CPU requirements and the Kindle caveat. Android runtime testing is still pending; the upstream project documentation follows below.
 
 Phonon brings natural text-to-speech to phones, laptops, browsers, and local
 services. It is built for offline assistants, accessibility tools, and

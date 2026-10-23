@@ -147,3 +147,11 @@ reentry (explicit deletion and saving again if necessary), without deleting mode
 A previously unsaved token cannot be recovered and must be entered once. Uninstall
 or app-data clearing removes it; update in place with the same signing certificate.
 See `tts-engine/RELEASE_NOTES.md` for this build's limitations.
+
+### Android fork update 0.4.1-android.4
+
+The system engine now supplies sentence-level playback positions on API 26+, based
+on original text offsets and emitted PCM frames after tempo processing. There is
+no word alignment. Sentence synthesis may change pauses/prosody; Kindle display
+behavior still needs phone testing. Native libraries, models and stored settings
+are unchanged. See `tts-engine/RELEASE_NOTES.md`.
