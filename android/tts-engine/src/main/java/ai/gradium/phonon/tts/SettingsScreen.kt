@@ -23,7 +23,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 
+internal data class InstalledChoice(val id: String, val label: String, val details: String)
 internal data class SettingsUiState(
+    val installed: List<InstalledChoice> = emptyList(), val selectedInstalled: String? = null, val installedCatalog: Set<String> = emptySet(),
     val ready: Boolean = false, val busy: Boolean = false, val loading: Boolean = false,
     val error: Boolean = false, val status: String = "", val installedDetails: String = "",
     val operation: String = "", val selectedModel: Int = 0,
@@ -33,6 +35,7 @@ internal data class SettingsUiState(
     val confirmReplacement: Boolean = false, val licenseText: String? = null
 )
 internal data class SettingsActions(
+    val selectInstalled: (String) -> Unit, val preferModel: () -> Unit,
     val selectModel: (Int) -> Unit, val selectVoice: (Int) -> Unit,
     val editSample: (String) -> Unit, val changeRate: (Int) -> Unit,
     val editToken: (String) -> Unit, val saveToken: () -> Unit, val deleteToken: () -> Unit,
@@ -64,6 +67,8 @@ private val SageDark = darkColorScheme(
 internal fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
     val dark = isSystemInDarkTheme()
     val context = LocalContext.current
+    val localeList = context.resources.configuration.locales
+    val recommendedLanguage = Routing.systemLanguage((0 until localeList.size()).map { localeList[it].toLanguageTag() },Model.SUPPORTED)
     val colors = if (Build.VERSION.SDK_INT >= 31) {
         if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
     } else if (dark) SageDark else SageLight
@@ -96,7 +101,14 @@ internal fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
                                 }
                                 Text(state.status, Modifier.weight(1f).semantics { liveRegion = LiveRegionMode.Polite }, style = MaterialTheme.typography.headlineSmall, color = if (state.error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
                             }
-                            if (state.installedDetails.isNotEmpty()) Text(state.installedDetails, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            state.installed.forEach { entry ->
+                                OutlinedCard(onClick = { actions.selectInstalled(entry.id) }, enabled = !state.busy) {
+                                    Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        RadioButton(selected = entry.id == state.selectedInstalled, onClick = null)
+                                        Column { Text(entry.label); Text(entry.details, style = MaterialTheme.typography.bodySmall) }
+                                    }
+                                }
+                            }
                             if (state.busy || state.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
                             if (state.operation.isNotBlank()) Text(state.operation, Modifier.semantics { liveRegion = LiveRegionMode.Polite }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             if (state.busy) OutlinedButton(onClick = actions.cancelInstall) { Text(stringResource(R.string.cancel)) }
@@ -107,6 +119,7 @@ internal fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
                             Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 SectionLabel(stringResource(R.string.voice_preview))
                                 VoiceSelect(state, actions)
+                                OutlinedButton(onClick = actions.preferModel) { Text(stringResource(R.string.prefer_language)) }
                                 OutlinedTextField(value = state.sample, onValueChange = actions.editSample, label = { Text(stringResource(R.string.sample_text)) }, modifier = Modifier.fillMaxWidth(), minLines = 3, maxLines = 7, shape = MaterialTheme.shapes.medium)
                                 Column {
                                     val rateLabel = stringResource(R.string.preview_rate, state.rate)
@@ -146,6 +159,8 @@ internal fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
                             RadioButton(selected = selected, onClick = null)
                             Column(Modifier.padding(start = 12.dp)) {
                                 Text(stringResource(model.label), style = MaterialTheme.typography.titleMedium)
+                                if(model.id in state.installedCatalog) Text(stringResource(R.string.already_installed), style = MaterialTheme.typography.labelMedium)
+                                if (model.languages.size == 1 && model.languages.first() == recommendedLanguage) Text(stringResource(R.string.recommended), style = MaterialTheme.typography.labelMedium)
                                 Text(stringResource(R.string.model_details, model.total / 1_000_000.0, if (model.gated) "CC-BY-NC 4.0" else "Apache 2.0"), style = MaterialTheme.typography.bodySmall)
                             }
                         }
@@ -181,7 +196,12 @@ internal fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable private fun VoiceSelect(state: SettingsUiState, actions: SettingsActions) {
     var expanded by remember { mutableStateOf(false) }
-    fun label(choice: Pair<String, String>) = "${BundledVoices.label(choice.second)} · ${choice.first}"
+    val defaultLabel = stringResource(R.string.default_voice)
+    val displayLocale = LocalContext.current.resources.configuration.locales[0]
+    fun label(choice: Pair<String, String>): String {
+        val speaker = if (choice.second == "default") defaultLabel else BundledVoices.label(choice.second)
+        return "$speaker · ${java.util.Locale.forLanguageTag(choice.first).getDisplayLanguage(displayLocale)}"
+    }
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
         OutlinedTextField(value = state.voices.getOrNull(state.selectedVoice)?.let { label(it) }.orEmpty(), onValueChange = {}, readOnly = true,
             label = { Text(stringResource(R.string.voice)) }, trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },

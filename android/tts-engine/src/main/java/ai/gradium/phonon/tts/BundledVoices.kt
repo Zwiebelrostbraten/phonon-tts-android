@@ -34,6 +34,21 @@ object BundledVoices {
             } finally { temporary.delete() }
         }
     }
+    /** File names and bundled manifest only; Android voice enumeration never loads weights. */
+    fun metadata(context: Context, entry: Model.Entry, lang: String): List<String> {
+        val names = linkedSetOf<String>()
+        if(File(entry.directory,"default-voice.safetensors").isFile) names += "default"
+        for(folder in listOf("voices","embeddings")) File(entry.directory,folder).listFiles()?.filter { it.isFile && it.name.endsWith(".safetensors") }?.sortedBy { it.name }?.forEach { names += it.name.removeSuffix(".safetensors") }
+        if(lang == "de") {
+            val manifest = JSONObject(context.assets.open("german-voices/manifest.json").bufferedReader().use { it.readText() }).getJSONArray("voices")
+            for(i in 0 until manifest.length()) { val v = manifest.getJSONObject(i); names += "Gradium_${v.getString("name")}_${v.getString("sha256")}" }
+        }
+        return names.filter { lang == "de" || !it.startsWith("Gradium_") }.ifEmpty { listOf("default") }
+    }
+    fun selectedMetadata(context: Context, entry: Model.Entry, lang: String): String {
+        val available = metadata(context,entry,lang)
+        return context.getSharedPreferences("voices",Context.MODE_PRIVATE).getString(lang,null)?.takeIf { it in available } ?: available.firstOrNull { it == "default" } ?: available.first()
+    }
     fun label(speaker: String): String = if (speaker.startsWith("Gradium_")) speaker.removePrefix("Gradium_").substringBefore('_') else speaker
     fun androidName(lang: String, speaker: String) = "$lang-${if (speaker.startsWith("Gradium_")) label(speaker) + " (Gradium)" else speaker}"
     fun speakers(model: Model.Loaded, lang: String) = model.speakers.filter { lang == "de" || !it.startsWith("Gradium_") }

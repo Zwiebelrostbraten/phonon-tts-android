@@ -25,9 +25,7 @@ class SettingsActivity : ComponentActivity() {
     private var previewGeneration = 0
     private var localError: String? = null
     private var pendingPreview: (() -> Unit)? = null
-    private var shownModel: Model.Loaded? = null
-    private var sizeForModel: Model.Loaded? = null
-    private var installedSize = 0L
+    private var shownModel: Model.Entry? = null
     private var importBytes = 0L
     private var initializedSelection = false
     private var resumed = false
@@ -44,7 +42,9 @@ class SettingsActivity : ComponentActivity() {
         setContent {
             SettingsScreen(ui, SettingsActions(
                 selectModel = { ui = ui.copy(selectedModel = it, token = "") },
-                selectVoice = { index -> ui.voices.getOrNull(index)?.let { BundledVoices.select(this, it.first, it.second) }; ui = ui.copy(selectedVoice = index) },
+                selectInstalled = { Model.select(this,it); refresh() },
+                preferModel = { ui.voices.getOrNull(ui.selectedVoice)?.let { choice -> shownModel?.let { Model.prefer(this,choice.first,it.id) } }; refresh() },
+                selectVoice = { index -> ui.voices.getOrNull(index)?.let { BundledVoices.select(this, it.first, it.second) }; ui = ui.copy(selectedVoice = index, sample = Samples.text[ui.voices.getOrNull(index)?.first] ?: ui.sample) },
                 editSample = { ui = ui.copy(sample = it) },
                 changeRate = { ui = ui.copy(rate = it) },
                 editToken = { ui = ui.copy(token = it) },
@@ -53,7 +53,7 @@ class SettingsActivity : ComponentActivity() {
                     catch (_: Exception) { ui = ui.copy(tokenStatus = getString(R.string.token_error)) }
                 },
                 download = { download() },
-                importModel = { confirmReplacement { startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION), PICK) } },
+                importModel = { startActivityForResult(Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION), PICK) },
                 cancelInstall = { InstallService.cancel(); stopPreview(); refresh() },
                 preview = { speak() }, stopPreview = { stopPreview() },
                 terms = { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(ModelCatalog.all[ui.selectedModel].page))) },
@@ -64,7 +64,6 @@ class SettingsActivity : ComponentActivity() {
                 dismissLicenses = { ui = ui.copy(licenseText = null) }
             ))
         }
-        Model.load(this)
         refresh()
     }
     private fun busy() = InstallService.running || Model.installing
@@ -85,27 +84,27 @@ class SettingsActivity : ComponentActivity() {
         val token = try { if (model.gated) tokenStore.read() else null }
             catch (_: Exception) { updateTokenStatus(); return }
         confirmReplacement {
-            InstallService.start(this) { InstallService.download(applicationContext, model, token) }
+            InstallService.start(this) { InstallService.download(applicationContext, model, token, Model.entries(this).firstOrNull { it.catalog?.id == model.id }?.id ?: model.id) }
             refresh()
         }
     }
     private fun confirmReplacement(action: () -> Unit) {
-        replacement.request(Model.dir(this).exists(), busy(), action)
+        replacement.request(Model.entries(this).any { it.id == ModelCatalog.all[ui.selectedModel].id || it.catalog?.id == ModelCatalog.all[ui.selectedModel].id }, busy(), action)
         ui = ui.copy(confirmReplacement = replacement.pending)
     }
     private fun stopPreview() {
         pendingPreview = null; preview?.stop(); ui = ui.copy(speaking = false)
     }
     private fun speak() {
-        if (Model.state !is Model.State.Ready || busy()) return
+        if (shownModel == null || busy()) return
         val requestedText = ui.sample
         val requestedRate = ui.rate / 100f
         val requestedVoice = ui.voices.getOrNull(ui.selectedVoice)
         val requestedModel = shownModel
         val request: () -> Unit = {
             val engine = preview
-            if (previewReady && engine != null && requestedModel === shownModel && Model.state is Model.State.Ready && !busy()) {
-                requestedVoice?.let { choice -> engine.voices?.firstOrNull { it.name == BundledVoices.androidName(choice.first, choice.second) }?.let { engine.language = it.locale; engine.voice = it } }
+            if (previewReady && engine != null && requestedModel === shownModel && !busy()) {
+                requestedVoice?.let { choice -> engine.voices?.firstOrNull { it.name == Routing.voice(requestedModel?.id ?: "",choice.first, choice.second) }?.let { engine.language = it.locale; engine.voice = it } }
                 engine.setSpeechRate(requestedRate)
                 if (engine.speak(requestedText, TextToSpeech.QUEUE_FLUSH, null, "preview") == TextToSpeech.SUCCESS) ui = ui.copy(speaking = true)
             }
@@ -125,43 +124,50 @@ class SettingsActivity : ComponentActivity() {
         } else if (previewReady) request() else pendingPreview = request
     }
     private fun refresh() {
+        val inventory = Model.entries(this)
+        val selectedEntry = Model.selected(this)
         val state = Model.state
-        val loaded = (state as? Model.State.Ready)?.model
-        val langs = loaded?.languages ?: Model.languages(this)
-        if (!initializedSelection && (langs.isNotEmpty() || state !is Model.State.Loading)) {
-            val config = runCatching { File(Model.dir(this), "config.json").takeIf { it.isFile }?.readBytes() }.getOrNull()
-            val matches = ModelCatalog.all.map { candidate ->
-                val expected = candidate.files.first { it.name == "config.json" }
-                val digest = config?.let { bytes ->
-                    val hash = java.security.MessageDigest.getInstance(if (expected.gitBlob) "SHA-1" else "SHA-256")
-                    if (expected.gitBlob) hash.update("blob ${bytes.size}\u0000".toByteArray())
-                    hash.digest(bytes).joinToString("") { "%02x".format(it) }
-                }
-                digest == expected.hash && File(Model.dir(this), "model.q8.gguf").length() == candidate.files.first { it.name == "model.q8.gguf" }.size
-            }
-            ui = ui.copy(selectedModel = initialModelSelection(matches))
+        if (!initializedSelection) {
+            val current = selectedEntry?.catalog?.id
+            val localeList = resources.configuration.locales
+            val systemLang = Routing.systemLanguage((0 until localeList.size()).map { localeList[it].toLanguageTag() },Model.SUPPORTED)
+            val recommended = ModelCatalog.all.firstOrNull { it.languages == listOf(systemLang) }?.id
+            ui = ui.copy(selectedModel = initialModelSelection(ModelCatalog.all.map { it.id == (current ?: recommended) }))
             initializedSelection = true
         }
-        if (loaded !== shownModel) {
+        if (selectedEntry !== shownModel) {
             stopPreview(); previewGeneration++; preview?.shutdown(); preview = null; previewReady = false
-            shownModel = loaded
-            val voices = loaded?.languages?.flatMap { lang -> BundledVoices.speakers(loaded, lang).ifEmpty { listOf("default") }.map { lang to it } }.orEmpty()
-            val selected = loaded?.let { m -> voices.indexOfFirst { (lang, voice) -> voice == BundledVoices.selected(this, m, lang) } } ?: 0
-            ui = ui.copy(voices = voices, selectedVoice = selected.coerceAtLeast(0))
-        }
-        if (loaded !== sizeForModel || installedSize == 0L || busy()) {
-            sizeForModel = loaded
-            installedSize = Model.dir(this).walkTopDown().filter { it.isFile }.sumOf { it.length() }
+            shownModel = selectedEntry
+            val voices = selectedEntry?.let { entry -> entry.languages.flatMap { lang ->
+                BundledVoices.metadata(this,entry,lang).map { lang to it }
+            } }.orEmpty()
+            val lang = Model.systemLanguage(this)?.takeIf { it in selectedEntry?.languages.orEmpty() }
+                ?: selectedEntry?.languages?.firstOrNull()
+            val selected = selectedEntry?.let { entry -> voices.indexOfFirst { (code, speaker) ->
+                code == lang && speaker == BundledVoices.selectedMetadata(this,entry,code)
+            } }?.coerceAtLeast(0) ?: 0
+            ui = ui.copy(voices = voices, selectedVoice = selected,
+                sample = Samples.text[voices.getOrNull(selected)?.first] ?: ui.sample)
         }
         val status = when (state) {
-            Model.State.NotInstalled -> getString(R.string.not_installed)
+            Model.State.NotInstalled -> getString(if(inventory.isEmpty()) R.string.not_installed else R.string.model_ready)
             Model.State.Loading -> getString(R.string.loading)
             is Model.State.Failed -> getString(R.string.load_failed, state.message)
             is Model.State.Ready -> getString(R.string.model_ready)
         }
-        ui = ui.copy(ready = loaded != null && !busy(), busy = busy(), loading = state is Model.State.Loading,
+        val installed = inventory.map { entry ->
+            val label = entry.catalog?.let { getString(it.label) }
+                ?: if(entry.id == "legacy") getString(R.string.legacy_model) else getString(R.string.custom_model,entry.id)
+            val size = entry.directory.walkTopDown().filter { it.isFile }.sumOf { it.length() }
+            val defaults = Model.preferredLanguages(this,entry.id)
+            val details = getString(R.string.installed_details,entry.languages.joinToString(", "),size / 1_000_000.0) +
+                if(defaults.isEmpty()) "" else "\n" + getString(R.string.language_defaults,defaults.joinToString(", "))
+            InstalledChoice(entry.id,label,details)
+        }
+        ui = ui.copy(installed = installed, selectedInstalled = selectedEntry?.id,
+            installedCatalog = inventory.mapNotNull { it.catalog?.id }.toSet(),
+            ready = selectedEntry != null && !busy(), busy = busy(), loading = state is Model.State.Loading,
             status = if (busy()) getString(R.string.installing_model) else status, error = state is Model.State.Failed,
-            installedDetails = if (Model.dir(this).exists()) getString(R.string.installed_details, langs.joinToString(", ") { java.util.Locale.forLanguageTag(it).getDisplayLanguage(resources.configuration.locales[0]) }, installedSize / 1_000_000.0) else "",
             operation = localError ?: InstallService.message,
             speaking = ui.speaking && preview?.isSpeaking == true)
     }
@@ -181,7 +187,7 @@ class SettingsActivity : ComponentActivity() {
                 finally { app.contentResolver.releasePersistableUriPermission(tree, Intent.FLAG_GRANT_READ_URI_PERMISSION) }
             }
             if (!started) contentResolver.releasePersistableUriPermission(tree, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        } catch (e: Exception) { localError = getString(R.string.import_failed, e.message ?: e.javaClass.simpleName) }
+        } catch (e: Exception) { localError = getString(R.string.operation_failed) }
         refresh()
     }
     /** Copy the files a checkpoint folder needs from the picked folder into [into]. */

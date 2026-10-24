@@ -23,7 +23,7 @@ class DataActivity : Activity() {
                 setResult(pass, result)
             }
             TextToSpeech.Engine.ACTION_GET_SAMPLE_TEXT -> {
-                val sample = SAMPLES[Model.code(intent.getStringExtra("language"))]
+                val sample = Samples.text[Model.code(intent.getStringExtra("language"))]
                 if (sample == null) {
                     setResult(TextToSpeech.LANG_NOT_SUPPORTED)
                 } else {
@@ -57,12 +57,15 @@ class DataActivity : Activity() {
             return ArrayList(out)
         }
 
-        val SAMPLES = mapOf(
+    }
+}
+
+object Samples {
+    val text = mapOf(
             "en" to "This is an example of speech synthesis in English.",
             "fr" to "Ceci est un exemple de synthèse vocale en français.",
             "de" to "Dies ist ein Beispiel für Sprachsynthese auf Deutsch.",
             "es" to "Este es un ejemplo de síntesis de voz en español.",
             "pt" to "Este é um exemplo de síntese de voz em português.",
         )
-    }
 }

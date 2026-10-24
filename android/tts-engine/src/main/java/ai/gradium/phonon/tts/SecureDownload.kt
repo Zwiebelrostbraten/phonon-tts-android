@@ -34,9 +34,9 @@ class SecureDownload(private val cancelled: () -> Boolean, private val progress:
     private fun checkCancelled() { if (cancelled()) throw CancellationException() }
 
     fun download(model: DownloadModel, token: String?, into: File) {
-        require(token == null || token.matches(Regex("hf_[A-Za-z0-9]{1,508}"))) { "Invalid HF read token format / Ungültiges Lesetoken-Format" }
+        require(token == null || token.matches(Regex("hf_[A-Za-z0-9]{1,508}"))) { "Invalid HF read token format" }
         require(model.total <= 80_000_000) { "Model exceeds size limit" }
-        require(into.usableSpace > model.total + 32L * 1024 * 1024) { "Not enough storage / Nicht genug Speicher" }
+        require(into.usableSpace > model.total + 32L * 1024 * 1024) { "Not enough storage" }
         var completed = 0L
         for (file in model.files) {
             checkCancelled()
@@ -61,8 +61,8 @@ class SecureDownload(private val cancelled: () -> Boolean, private val progress:
                         conn.disconnect(); connection = null; active = null
                         continue
                     }
-                    if (status == 401 || status == 403) error("401/403: Accept the model terms on Hugging Face and enter your own read token. / Modellbedingungen akzeptieren und eigenen Lesetoken eingeben.")
-                    require(status == 200) { "Download HTTP $status. Check network and retry / Netzwerk prüfen." }
+                    if (status == 401 || status == 403) error("401/403: Accept the model terms on Hugging Face and enter your own read token.")
+                    require(status == 200) { "Download HTTP $status. Check network and retry." }
                     require(conn.contentType?.lowercase()?.contains("text/html") != true) { "Server returned HTML" }
                     require(conn.contentLengthLong == -1L || conn.contentLengthLong == file.size) { "Unexpected file length" }
                     val part = File(into, file.name + ".part")
@@ -86,7 +86,7 @@ class SecureDownload(private val cancelled: () -> Boolean, private val progress:
                         }
                         DownloadPolicy.verify(file, count, digest.digest())
                         checkCancelled()
-                        check(part.renameTo(File(into, file.name))) { "Cannot save model file / Speicherfehler" }
+                        check(part.renameTo(File(into, file.name))) { "Cannot save model file" }
                     } finally { part.delete() }
                     completed += file.size
                     break

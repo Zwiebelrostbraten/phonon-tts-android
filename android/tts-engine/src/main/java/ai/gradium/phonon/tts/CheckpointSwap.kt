@@ -4,6 +4,18 @@ import java.io.File
 
 /** Called only under the model installation/load lock. Backup is the crash recovery marker. */
 object CheckpointSwap {
+    /** Close the candidate before touching its files; restore only after successful recovery. */
+    fun restoreActivation(error: Throwable, close: () -> Unit, recover: () -> Unit, restore: () -> Unit): Nothing {
+        try {
+            close()
+            recover()
+            restore()
+        } catch (recoveryError: Throwable) {
+            if (recoveryError !== error) error.addSuppressed(recoveryError)
+        }
+        throw error
+    }
+
     fun recover(target: File) {
         val backup = File(target.parentFile, target.name + ".backup")
         if (backup.exists()) {

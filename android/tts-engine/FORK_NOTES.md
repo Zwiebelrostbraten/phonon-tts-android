@@ -1,6 +1,10 @@
+# Current update: 0.4.1-android.8 (versionCode 9)
+
+See README.md for the current multi-model contract. The records below are historical; single-model, eager loading and double-memory staging descriptions no longer apply. Current validation is recorded in UPDATE8_VALIDATION.md.
+
 # Android fork implementation notes
 
-Current status: **0.4.1-android.7**, versionCode **8**, with encrypted persistent HF tokens and 13 bundled public German voice embeddings. See the .3 section below and the latest delivery refresh at the end. Earlier build records and implementation claims describe historical versions; memory-only/no-storage token claims and .1/.2 version references do not describe the current app.
+Historical status before .8: **0.4.1-android.7**, versionCode **8**, with encrypted persistent HF tokens and 13 bundled public German voice embeddings. See the .3 section below and the latest delivery refresh at the end. Earlier build records and implementation claims describe historical versions; memory-only/no-storage token claims and .1/.2 version references do not describe the current app.
 
 Base: upstream `6fc8b65f7e71146517098aa428c8cfa135b4fcb5` in the existing community fork. No new engine or renamed upstream ownership claim. No commits, pushes, GitHub API calls, emulator, CI runs or broad test suite performed for this task. Rust sources, Cargo files, native build script and shared Kotlin wrapper were left unchanged. The native CPU build is complete; both real ABI libraries are packaged and verified.
 

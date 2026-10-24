@@ -3,189 +3,127 @@ package ai.gradium.phonon.tts
 import ai.gradium.phonon.PhononTTS
 import android.content.Context
 import android.system.Os
-import android.util.Log
 import org.json.JSONObject
 import java.io.File
 import java.util.Locale
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
 
-/**
- * The installed checkpoint and the model loaded from it, shared by the service and the settings
- * screen, which run in one process. The model is loaded once, off the main thread, and kept.
- */
 object Model {
-    private const val TAG = "PhononModel"
-
-    /** The languages the runtime normalizes text for. */
     val SUPPORTED = listOf("en", "fr", "de", "es", "pt")
-
-    /** Loaded models. Calls into one must hold its lock: the library takes one call at a time. */
-    class Loaded(val tts: PhononTTS, val speakers: List<String>, val languages: List<String>) {
-        /** The voice spoken when a request names none: `default` if the checkpoint has one. */
+    /** Every native operation, including synthesis and close, owns this lock. Never lock a handle. */
+    val lifecycle = Any()
+    class Loaded(val tts: PhononTTS, val speakers: List<String>, val languages: List<String>, val id: String) {
         val defaultSpeaker = if ("default" in speakers) "default" else speakers.firstOrNull()
     }
-
+    data class Entry(val id: String, val directory: File, val languages: List<String>, val catalog: DownloadModel?)
     sealed class State {
         object NotInstalled : State()
         object Loading : State()
         class Ready(val model: Loaded) : State()
         class Failed(val message: String) : State()
     }
-
-    @Volatile var state: State = State.NotInstalled
-        private set
-
+    @Volatile var state: State = State.NotInstalled; private set
+    @Volatile var installing = false; private set
     private val installLock = Any()
-    @Volatile var installing = false
-        private set
-
-    @Synchronized
-    private fun recover(context: Context) {
-        if (state !is State.Ready && pending?.isDone != false) CheckpointSwap.recover(dir(context))
-    }
-
     private val loader = Executors.newSingleThreadExecutor()
-    private var pending: Future<*>? = null
-
-    fun dir(context: Context) = File(context.filesDir, "model")
-
-    /** Whether a checkpoint folder is in place. It may still fail to load. */
-    fun installed(context: Context): Boolean {
-        val dir = dir(context)
-        return File(dir, "config.json").isFile && File(dir, "tokenizer.json").isFile &&
-            (File(dir, "model.q8.gguf").isFile || File(dir, "model.safetensors").isFile)
+    private val metadataLock = Any()
+    @Volatile private var snapshot: List<Entry>? = null
+    fun entries(context: Context): List<Entry> = snapshot ?: synchronized(metadataLock) {
+        snapshot ?: discover(context).also { snapshot = it }
     }
-
-    /**
-     * The languages the installed checkpoint speaks, read from its config without loading it.
-     * A config that lists none is taken to speak them all.
-     */
-    fun languages(context: Context): List<String> {
-        if (!installed(context)) return emptyList()
-        return checkpointLanguages(dir(context))
+    private fun discover(context: Context): List<Entry> =
+        Inventory(context.filesDir).directories().map { (id, dir) ->
+            val catalog = ModelCatalog.all.firstOrNull { m ->
+                val expected = m.files.first { it.name == "config.json" }
+                val bytes = File(dir,"config.json").readBytes()
+                DownloadPolicy.hex(DownloadPolicy.digest(expected).digest(bytes)) == expected.hash &&
+                    File(dir,"model.q8.gguf").length() == m.files.first { it.name == "model.q8.gguf" }.size
+            }
+            Entry(id,dir,catalog?.languages ?: checkpointLanguages(dir),catalog)
+        }
+    private fun prefs(context: Context) = context.getSharedPreferences("models",Context.MODE_PRIVATE)
+    fun selected(context: Context): Entry? {
+        val entries = entries(context)
+        return entries.firstOrNull { it.id == prefs(context).getString("selected",null) } ?: route(context,systemLanguage(context),entries) ?: entries.firstOrNull()
     }
-
+    fun select(context: Context, id: String) { prefs(context).edit().putString("selected",id).apply(); load(context) }
+    fun prefer(context: Context, lang: String, id: String) { if(entries(context).any { it.id == id && lang in it.languages }) prefs(context).edit().putString("language-$lang",id).apply() }
+    fun preferredLanguages(context: Context, id: String) = SUPPORTED.filter { prefs(context).getString("language-$it",null) == id }
+    fun route(context: Context, lang: String?, entries: List<Entry> = entries(context)): Entry? {
+        if(lang == null) return null
+        val chosen = Routing.choose(entries.map { RouteModel(it.id,it.languages) },lang,prefs(context).getString("language-$lang",null))
+        return entries.firstOrNull { it.id == chosen?.id }
+    }
+    fun systemLanguage(context: Context): String? {
+        val locales = context.resources.configuration.locales
+        return Routing.systemLanguage((0 until locales.size()).map { locales[it].toLanguageTag() }, languages(context))
+    }
+    fun dir(context: Context) = selected(context)?.directory ?: File(context.filesDir,"model")
+    fun installed(context: Context) = entries(context).isNotEmpty()
+    fun languages(context: Context) = Routing.languages(entries(context).map { RouteModel(it.id,it.languages) })
     private fun checkpointLanguages(checkpoint: File): List<String> {
-        val listed = try {
-            JSONObject(File(checkpoint, "config.json").readText()).optJSONArray("languages")
-        } catch (e: Exception) {
-            null
-        }
-        val names = (0 until (listed?.length() ?: 0)).map { listed!!.getString(it) }
-        return if (names.isEmpty()) SUPPORTED else SUPPORTED.filter { it in names }
+        val listed = runCatching { JSONObject(File(checkpoint,"config.json").readText()).optJSONArray("languages") }.getOrNull()
+        val names = (0 until (listed?.length() ?: 0)).mapNotNull { code(listed!!.optString(it)) }
+        // Unknown legacy imports must not advertise all five training languages.
+        return if (listed == null || listed.length() == 0) listOf("en") else names.distinct()
     }
-
-    /** Start loading the installed checkpoint, unless it is loaded or loading already. */
-    @Synchronized
-    fun load(context: Context): Future<*>? {
-        recover(context)
-        if (state is State.Ready || pending?.isDone == false) return pending
-        if (!installed(context)) {
-            state = State.NotInstalled
-            return null
-        }
-        val dir = dir(context).path
-        val languages = languages(context)
-        state = State.Loading
-        pending = loader.submit {
-            state = try {
-                // Before the first load: the library's thread pool reads it once. One thread per
-                // core is too many on phones that mix fast and slow cores. A value already set wins.
-                Os.setenv("RAYON_NUM_THREADS", THREADS.toString(), false)
-                // Text is normalized per request with setLanguage; this is only the first one.
-                BundledVoices.install(context, File(dir), languages)
-                val tts = PhononTTS(dir, languages.firstOrNull() ?: "none")
-                State.Ready(Loaded(tts, tts.voices, languages))
-            } catch (t: Throwable) {
-                Log.e(TAG, "loading $dir failed", t)
-                State.Failed(t.message ?: t.toString())
-            }
-        }
-        return pending
+    fun load(context: Context): Future<*> = loader.submit { synchronized(lifecycle) { selected(context)?.let { activate(context,it) } } }
+    fun await(context: Context): Loaded? = synchronized(lifecycle) { selected(context)?.let { activate(context,it) } }
+    fun <T> use(context: Context, entry: Entry, work: (Loaded) -> T): T? = synchronized(lifecycle) { activate(context,entry)?.let(work) }
+    private fun close() { (state as? State.Ready)?.model?.tts?.close(); state = State.NotInstalled }
+    private fun activate(context: Context, entry: Entry): Loaded? {
+        (state as? State.Ready)?.model?.takeIf { it.id == entry.id }?.let { return it }
+        close(); state = State.Loading
+        return try {
+            Os.setenv("RAYON_NUM_THREADS","2",false)
+            BundledVoices.install(context,entry.directory,entry.languages)
+            val tts = PhononTTS(entry.directory.path,entry.languages.firstOrNull() ?: "none")
+            val loaded = try { Loaded(tts,tts.voices,entry.languages,entry.id) } catch(t: Throwable) { tts.close(); throw t }
+            state = State.Ready(loaded); loaded
+        } catch(t: Throwable) { state = State.Failed(context.getString(R.string.activation_error)); null }
     }
-
-    /** The loaded model, waiting for a load in progress. Null when none could be loaded. */
-    fun await(context: Context): Loaded? {
-        try {
-            load(context)?.get(LOAD_TIMEOUT_S, TimeUnit.SECONDS)
-        } catch (e: Exception) {
-            Log.w(TAG, "waiting for the model failed", e)
-        }
-        return (state as? State.Ready)?.model
-    }
-
-    /**
-     * Replace the installed checkpoint with what [fill] writes into an empty folder, then load
-     * it. [fill] runs on the calling thread, which must not be the main one. This is the one way
-     * in: a download from a model hub would be another [fill].
-     */
-    fun install(context: Context, cancelled: () -> Boolean = { false }, fill: (File) -> Unit) = synchronized(installLock) {
+    fun install(context: Context, cancelled: () -> Boolean = { false }, id: String = "custom-" + java.util.UUID.randomUUID(), fill: (File) -> Unit) = synchronized(installLock) {
+        entries(context) // establish a recovery snapshot before creating transaction markers
         installing = true
-        val staging = File(context.filesDir, "model.staging")
+        val target = Inventory(context.filesDir).target(id)
+        val staging = File(target.parentFile,target.name + ".staging")
         try {
-            recover(context)
-            check(!staging.exists() || staging.deleteRecursively()) { "Cannot clear staging folder" }
-            check(staging.mkdirs()) { "Cannot create staging folder" }
+            synchronized(lifecycle) { CheckpointSwap.recover(target) }
+            check(!staging.exists() || staging.deleteRecursively())
+            check(staging.mkdirs())
             fill(staging)
-            for (name in listOf("config.json", "tokenizer.json")) {
-                require(File(staging, name).isFile) { "Missing $name" }
-            }
-            require(File(staging, "model.q8.gguf").isFile || File(staging, "model.safetensors").isFile) {
-                "Missing model weights"
-            }
-            BundledVoices.install(context, staging, checkpointLanguages(staging))
-            // Validate the actual native checkpoint before touching the installed model.
-            Os.setenv("RAYON_NUM_THREADS", THREADS.toString(), false)
-            PhononTTS(staging.path, "none").use { it.voices }
-            if (cancelled()) throw java.util.concurrent.CancellationException()
-            synchronized(this) {
-                unload() // waits for active synthesis under the loaded-model lock
+            require(Inventory.complete(staging))
+            if(cancelled()) throw java.util.concurrent.CancellationException()
+            synchronized(lifecycle) {
+                val previousEntries = entries(context)
+                val previous = (state as? State.Ready)?.model?.id?.let { activeId -> previousEntries.firstOrNull { it.id == activeId } }
+                val previousSelection = prefs(context).getString("selected",null)
+                close() // validation must never create a second native handle
                 try {
-                    CheckpointSwap.replace(staging, dir(context)) {
-                        val tts = PhononTTS(dir(context).path, "none")
-                        try { state = State.Ready(Loaded(tts, tts.voices, tts.languages)) }
-                        catch (t: Throwable) { tts.close(); throw t }
+                    Inventory(context.filesDir).commit(id,staging,cancelled) {
+                        if(cancelled()) throw java.util.concurrent.CancellationException()
+                        check(activate(context,Entry(id,target,ModelCatalog.all.firstOrNull { it.id == id }?.languages ?: checkpointLanguages(target),null)) != null) { context.getString(R.string.activation_error) }
+                        if(cancelled()) { close(); throw java.util.concurrent.CancellationException() }
                     }
-                } catch (t: Throwable) {
-                    (state as? State.Ready)?.model?.tts?.close()
-                    state = State.NotInstalled
-                    pending = null
-                    load(context)
-                    throw t
+                    snapshot = discover(context)
+                    prefs(context).edit().putString("selected",id).apply()
+                } catch(t: Throwable) {
+                    CheckpointSwap.restoreActivation(t, { close() }, { CheckpointSwap.recover(target) }) {
+                        snapshot = previousEntries
+                        prefs(context).edit().putString("selected",previousSelection).apply()
+                        previous?.takeIf {
+                            Inventory.complete(it.directory) && !File(it.directory.parentFile,it.directory.name + ".backup").exists()
+                        }?.let { check(activate(context,it) != null) { context.getString(R.string.activation_error) } }
+                    }
                 }
             }
-        } finally {
-            staging.deleteRecursively()
-            installing = false
-        }
+        } finally { staging.deleteRecursively(); installing = false }
     }
-
-    /** Free the loaded model, once whatever is speaking with it has finished. */
-    @Synchronized
-    private fun unload() {
-        pending?.get()
-        (state as? State.Ready)?.model?.let { synchronized(it) { it.tts.close() } }
-        state = State.NotInstalled
-        pending = null
-    }
-
-    /** A language as Android names it, two or three letters, to one of [SUPPORTED], or null. */
     fun code(language: String?): String? {
-        if (language.isNullOrEmpty()) return null
-        val iso3 = when (language.lowercase(Locale.ROOT)) {
-            "fre" -> "fra"
-            "ger" -> "deu"
-            else -> try {
-                Locale.forLanguageTag(language).isO3Language
-            } catch (e: Exception) {
-                return null
-            }
-        }
-        return SUPPORTED.firstOrNull { Locale.forLanguageTag(it).isO3Language == iso3 }
+        if(language.isNullOrEmpty()) return null
+        val value = language.lowercase(Locale.ROOT).replace('_','-')
+        val aliases = mapOf("fre" to "fr","fra" to "fr","ger" to "de","deu" to "de","eng" to "en","spa" to "es","por" to "pt")
+        return aliases[value] ?: Locale.forLanguageTag(value).language.takeIf { it in SUPPORTED }
     }
-
-    private const val THREADS = 2
-    private const val LOAD_TIMEOUT_S = 60L
 }

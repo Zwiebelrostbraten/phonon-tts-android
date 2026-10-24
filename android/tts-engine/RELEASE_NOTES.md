@@ -1,3 +1,9 @@
+# 0.4.1-android.8
+
+Concurrent installed checkpoints, all seven original Q8 CPU models and five-language system-following UI. Existing legacy imports remain in place. Language defaults and model-qualified voices route requests through one serialized native handle. Same app ID, certificate, native libraries, German embeddings and token storage. See README.md and UPDATE8_VALIDATION.md.
+
+## Historical release records
+
 # 0.4.1-android.7 (versionCode 8)
 
 Small packaging update to the .6 Compose Material 3 redesign. System light/dark

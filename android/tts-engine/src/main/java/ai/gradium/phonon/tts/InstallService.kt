@@ -26,7 +26,7 @@ class InstallService : Service() {
         thread(name = "model-install") {
             try { task(); message = getString(R.string.install_complete) }
             catch (e: CancellationException) { message = getString(R.string.cancelled) }
-            catch (t: Throwable) { message = if (cancelled) getString(R.string.cancelled) else getString(R.string.import_failed, t.message ?: t.javaClass.simpleName) }
+            catch (t: Throwable) { message = if (cancelled) getString(R.string.cancelled) else getString(R.string.operation_failed) }
             finally {
                 synchronized(InstallService) {
                     downloader = null
@@ -55,12 +55,12 @@ class InstallService : Service() {
         }
         fun cancel() { cancelled = true; downloader?.cancel() }
         fun checkCancelled() { if (cancelled) throw CancellationException() }
-        fun download(context: Context, model: DownloadModel, token: String?) {
+        fun download(context: Context, model: DownloadModel, token: String?, targetId: String = model.id) {
             val client = SecureDownload({ cancelled }) { done, total ->
                 message = "${context.getString(model.label)}: ${done * 100 / total}% (${done / 1024} / ${total / 1024} KiB)"
             }
             downloader = client
-            Model.install(context, { cancelled }) { into -> client.download(model, token, into); checkCancelled() }
+            Model.install(context, { cancelled }, targetId) { into -> client.download(model, token, into); checkCancelled() }
         }
     }
 }
