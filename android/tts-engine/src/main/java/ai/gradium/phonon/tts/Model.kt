@@ -47,8 +47,20 @@ object Model {
         val entries = entries(context)
         return entries.firstOrNull { it.id == prefs(context).getString("selected",null) } ?: route(context,systemLanguage(context),entries) ?: entries.firstOrNull()
     }
-    fun select(context: Context, id: String) { prefs(context).edit().putString("selected",id).apply(); load(context) }
-    fun prefer(context: Context, lang: String, id: String) { if(entries(context).any { it.id == id && lang in it.languages }) prefs(context).edit().putString("language-$lang",id).apply() }
+    fun select(context: Context, id: String) {
+        val preferences = prefs(context)
+        val current = ModelSelection(preferences.getString("selected", null),
+            preferences.all.mapNotNull { (key, value) ->
+                if (key.startsWith("language-") && value is String) key.removePrefix("language-") to value else null
+            }.toMap())
+        val next = SelectionPolicy.choose(entries(context).map { RouteModel(it.id, it.languages) }, id, current)
+        if (next === current) return // Unknown installed identity: no writes and no native load.
+        preferences.edit().apply {
+            putString("selected", next.selected)
+            next.defaults.forEach { (language, model) -> putString("language-$language", model) }
+        }.apply()
+        load(context)
+    }
     fun preferredLanguages(context: Context, id: String) = SUPPORTED.filter { prefs(context).getString("language-$it",null) == id }
     fun route(context: Context, lang: String?, entries: List<Entry> = entries(context)): Entry? {
         if(lang == null) return null

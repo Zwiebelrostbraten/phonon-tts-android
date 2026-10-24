@@ -1,3 +1,7 @@
+# 0.4.1-android.9 (versionCode 10)
+
+Installed model rows now use consistent full widths, title-aligned radio indicators, explicit spacing and a single accessible selection target. Selecting a model automatically saves it as the default for all its supported languages; unrelated defaults remain unchanged. The obsolete preview default button is removed in all five locales (66 string keys). No runtime, voice assets, storage paths, permissions or TokenStore changes.
+
 # 0.4.1-android.8
 
 Concurrent installed checkpoints, all seven original Q8 CPU models and five-language system-following UI. Existing legacy imports remain in place. Language defaults and model-qualified voices route requests through one serialized native handle. Same app ID, certificate, native libraries, German embeddings and token storage. See README.md and UPDATE8_VALIDATION.md.

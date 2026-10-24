@@ -30,7 +30,7 @@
   <string name="preview">Écouter l’aperçu</string>
   <string name="stop_preview">Arrêter l’aperçu</string>
   <string name="licenses">Licences hors ligne</string>
-  <string name="about_fork">0.4.1-android.8 · Version communautaire · Synthèse hors ligne</string>
+  <string name="about_fork">0.4.1-android.9 · Version communautaire · Synthèse hors ligne</string>
   <string name="installed_model">Modèles installés</string>
   <string name="installed_details">%1$s · %2$.1f MB sur l’appareil</string>
   <string name="model_actions">Catalogue · 7 modèles</string>
@@ -60,7 +60,6 @@
   <string name="portuguese">Portugais · 40M</string>
   <string name="activation_error">Échec du chargement du modèle. Vérifiez les fichiers du checkpoint.</string>
   <string name="operation_failed">Échec de l’installation. Vérifiez le stockage, le réseau, les fichiers du checkpoint et l’autorisation d’accès au modèle, puis réessayez. Les installations existantes sont conservées.</string>
-  <string name="prefer_language">Utiliser le modèle sélectionné par défaut pour la langue de cette voix</string>
   <string name="legacy_model">Modèle existant (conservé)</string>
   <string name="custom_model">Modèle importé · %1$s</string>
   <string name="already_installed">Installé · le téléchargement réinstalle ce modèle</string>

@@ -11,7 +11,7 @@ for abi in arm64-v8a x86_64; do
     }
 done
 python3 "$APP_DIR/validate-resources.py"
-"$APP_DIR/gradlew" -p "$APP_DIR" assembleRelease testDebugUnitTest --tests ai.gradium.phonon.tts.FocusedTest --tests ai.gradium.phonon.tts.ProgressTest --tests ai.gradium.phonon.tts.SettingsStateTest --tests ai.gradium.phonon.tts.InventoryTest --console=plain
+"$APP_DIR/gradlew" -p "$APP_DIR" assembleRelease testDebugUnitTest --tests ai.gradium.phonon.tts.FocusedTest --tests ai.gradium.phonon.tts.ProgressTest --tests ai.gradium.phonon.tts.SettingsStateTest --tests ai.gradium.phonon.tts.InventoryTest --tests ai.gradium.phonon.tts.SelectionPolicyTest --console=plain
 python3 - "$APP_DIR" "$ARTIFACT_DIR" <<'PY'
 import json, hashlib, pathlib, shutil, struct, sys, zipfile
 app, destination = map(pathlib.Path, sys.argv[1:])
@@ -35,7 +35,7 @@ with zipfile.ZipFile(apk) as archive:
     assert archive.getinfo('assets/licenses/German-Voices-NOTICE.txt').file_size > 100
     for name in ['LICENSE-MIT' ,'LICENSE-APACHE','Sonic-LICENSE.txt','NOTICE.txt']:
         assert archive.getinfo(f'assets/licenses/{name}').file_size > 100
-out = destination / 'Phonon-TTS-v0.4.1-android.8.apk'
+out = destination / 'Phonon-TTS-v0.4.1-android.9.apk'
 shutil.copy2(apk,out)
 sha = hashlib.sha256(out.read_bytes()).hexdigest()
 checksum = out.with_name(out.name + '.sha256')
@@ -45,6 +45,6 @@ print(checksum.read_text(),end='')
 PY
 
 # Validate in-place preview compatibility when the previous release is available locally.
-if test -f "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.7.apk"; then
-    python3 "$APP_DIR/verify-update.py" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.8.apk" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.7.apk"
+if test -f "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.8.apk"; then
+    python3 "$APP_DIR/verify-update.py" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.9.apk" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.8.apk"
 fi

@@ -30,7 +30,7 @@
   <string name="preview">Ouvir prévia</string>
   <string name="stop_preview">Parar prévia</string>
   <string name="licenses">Licenças offline</string>
-  <string name="about_fork">0.4.1-android.8 · Versão comunitária · Voz offline</string>
+  <string name="about_fork">0.4.1-android.9 · Versão comunitária · Voz offline</string>
   <string name="installed_model">Modelos instalados</string>
   <string name="installed_details">%1$s · %2$.1f MB no dispositivo</string>
   <string name="model_actions">Catálogo · 7 modelos</string>
@@ -60,7 +60,6 @@
   <string name="portuguese">Português · 40M</string>
   <string name="activation_error">Não foi possível carregar o modelo. Verifique os arquivos do checkpoint.</string>
   <string name="operation_failed">Falha na instalação. Verifique o armazenamento, a rede, os arquivos do checkpoint e a autorização de acesso ao modelo e tente novamente. As instalações existentes são preservadas.</string>
-  <string name="prefer_language">Usar o modelo selecionado como padrão para o idioma desta voz</string>
   <string name="legacy_model">Modelo existente (preservado)</string>
   <string name="custom_model">Modelo importado · %1$s</string>
   <string name="already_installed">Instalado · o download reinstala este modelo</string>

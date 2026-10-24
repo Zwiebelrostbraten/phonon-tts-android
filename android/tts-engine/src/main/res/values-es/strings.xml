@@ -30,7 +30,7 @@
   <string name="preview">Escuchar muestra</string>
   <string name="stop_preview">Detener muestra</string>
   <string name="licenses">Licencias sin conexión</string>
-  <string name="about_fork">0.4.1-android.8 · Versión comunitaria · Voz sin conexión</string>
+  <string name="about_fork">0.4.1-android.9 · Versión comunitaria · Voz sin conexión</string>
   <string name="installed_model">Modelos instalados</string>
   <string name="installed_details">%1$s · %2$.1f MB en el dispositivo</string>
   <string name="model_actions">Catálogo · 7 modelos</string>
@@ -60,7 +60,6 @@
   <string name="portuguese">Portugués · 40M</string>
   <string name="activation_error">No se pudo cargar el modelo. Revisa los archivos del checkpoint.</string>
   <string name="operation_failed">Error de instalación. Revisa el almacenamiento, la red, los archivos del checkpoint y la autorización de acceso al modelo e inténtalo de nuevo. Se conservan las instalaciones existentes.</string>
-  <string name="prefer_language">Usar el modelo seleccionado por defecto para el idioma de esta voz</string>
   <string name="legacy_model">Modelo existente (conservado)</string>
   <string name="custom_model">Modelo importado · %1$s</string>
   <string name="already_installed">Instalado · la descarga reinstala este modelo</string>

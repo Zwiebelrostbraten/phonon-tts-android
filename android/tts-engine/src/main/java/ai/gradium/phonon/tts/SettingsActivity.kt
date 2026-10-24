@@ -43,7 +43,6 @@ class SettingsActivity : ComponentActivity() {
             SettingsScreen(ui, SettingsActions(
                 selectModel = { ui = ui.copy(selectedModel = it, token = "") },
                 selectInstalled = { Model.select(this,it); refresh() },
-                preferModel = { ui.voices.getOrNull(ui.selectedVoice)?.let { choice -> shownModel?.let { Model.prefer(this,choice.first,it.id) } }; refresh() },
                 selectVoice = { index -> ui.voices.getOrNull(index)?.let { BundledVoices.select(this, it.first, it.second) }; ui = ui.copy(selectedVoice = index, sample = Samples.text[ui.voices.getOrNull(index)?.first] ?: ui.sample) },
                 editSample = { ui = ui.copy(sample = it) },
                 changeRate = { ui = ui.copy(rate = it) },

@@ -1,11 +1,11 @@
 # Phonon TTS — Android community fork
 
-Community Android system TTS engine based on [Gradium Phonon](https://github.com/gradium-ai/xn-ptts). Current preview: **0.4.1-android.8**, versionCode **9**. The Rust runtime is unchanged.
+Community Android system TTS engine based on [Gradium Phonon](https://github.com/gradium-ai/xn-ptts). Current preview: **0.4.1-android.9**, versionCode **10**. The Rust runtime is unchanged.
 
 ## Install and use
 
-1. Install `Phonon-TTS-v0.4.1-android.8.apk` over the existing preview. The application ID (`ai.gradium.phonon.tts`) and Android Debug signing certificate are unchanged. Do not uninstall or clear app data: existing checkpoints, voice preferences and encrypted Hugging Face tokens are preserved.
-2. Open Phonon TTS. The installed list shows each checkpoint, its languages and local size. Selecting an installed entry loads it for preview without downloading. Select the spoken language/voice and optionally make that model the default for that language. Preview text changes to a sample in the selected spoken language.
+1. Install `Phonon-TTS-v0.4.1-android.9.apk` over the existing preview. The application ID (`ai.gradium.phonon.tts`) and Android Debug signing certificate are unchanged. Do not uninstall or clear app data: existing checkpoints, voice preferences and encrypted Hugging Face tokens are preserved.
+2. Open Phonon TTS. The installed list shows each checkpoint, its languages and local size. Selecting an installed entry loads it for preview and automatically makes it the default for every language it supports, preserving other language defaults. Select the spoken language/voice. Preview text changes to a sample in the selected spoken language.
 3. Choose a catalog model to download, or separately import a local checkpoint folder. Models coexist. Only reinstalling the same catalog identity requires confirmation. Cancellation or failed activation preserves all previous installations. Downloads run as foreground operations with progress and cancellation.
 4. Select Phonon TTS in Android speech settings. Available languages are the union of installed checkpoints. A requested language uses its saved preferred model, then a deterministic specialist-before-multilingual fallback. Explicit model-qualified voices take precedence. Unknown voices are not advertised or validated. Older voice names resolve only against known voices in the language default model.
 5. The UI follows Android system/app language resources: English, German, French, Spanish and Portuguese, including regional variants. Other UI languages fall back to English. Speech initialization uses the Android locale list and installed languages. This does not detect the language of arbitrary text.

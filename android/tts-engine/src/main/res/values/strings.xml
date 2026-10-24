@@ -30,7 +30,7 @@
   <string name="preview">Speak preview</string>
   <string name="stop_preview">Stop preview</string>
   <string name="licenses">Offline licenses</string>
-  <string name="about_fork">0.4.1-android.8 · Community fork · Offline speech</string>
+  <string name="about_fork">0.4.1-android.9 · Community fork · Offline speech</string>
   <string name="installed_model">Installed models</string>
   <string name="installed_details">%1$s · %2$.1f MB on device</string>
   <string name="model_actions">Download catalog · 7 models</string>
@@ -60,7 +60,6 @@
   <string name="portuguese">Portuguese · 40M</string>
   <string name="activation_error">Model activation failed. Check checkpoint files.</string>
   <string name="operation_failed">Installation failed. Check storage, network, checkpoint files and model access approval; then retry. Existing installations are preserved.</string>
-  <string name="prefer_language">Use selected model by default for this voice language</string>
   <string name="legacy_model">Existing model (preserved)</string>
   <string name="custom_model">Imported model · %1$s</string>
   <string name="already_installed">Installed · download reinstalls this model</string>

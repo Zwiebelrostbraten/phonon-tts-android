@@ -1,6 +1,6 @@
-# Current update: 0.4.1-android.8 (versionCode 9)
+# Current update: 0.4.1-android.9 (versionCode 10)
 
-See README.md for the current multi-model contract. The records below are historical; single-model, eager loading and double-memory staging descriptions no longer apply. Current validation is recorded in UPDATE8_VALIDATION.md.
+See README.md for the current multi-model contract. The records below are historical; single-model, eager loading and double-memory staging descriptions no longer apply. Current validation is recorded in UPDATE9_VALIDATION.md.
 
 # Android fork implementation notes
 

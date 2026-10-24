@@ -30,7 +30,7 @@
   <string name="preview">Vorschau sprechen</string>
   <string name="stop_preview">Vorschau stoppen</string>
   <string name="licenses">Lizenzen (offline)</string>
-  <string name="about_fork">0.4.1-android.8 · Community-Fork · Offline-Sprachausgabe</string>
+  <string name="about_fork">0.4.1-android.9 · Community-Fork · Offline-Sprachausgabe</string>
   <string name="installed_model">Installierte Modelle</string>
   <string name="installed_details">%1$s · %2$.1f MB auf dem Gerät</string>
   <string name="model_actions">Download-Katalog · 7 Modelle</string>
@@ -60,7 +60,6 @@
   <string name="portuguese">Portugiesisch · 40M</string>
   <string name="activation_error">Modell konnte nicht geladen werden. Checkpoint-Dateien prüfen.</string>
   <string name="operation_failed">Installation fehlgeschlagen. Speicher, Netzwerk, Checkpoint-Dateien und Modellfreigabe prüfen und erneut versuchen. Vorhandene Installationen bleiben erhalten.</string>
-  <string name="prefer_language">Ausgewähltes Modell als Standard für diese Stimmensprache verwenden</string>
   <string name="legacy_model">Vorhandenes Modell (beibehalten)</string>
   <string name="custom_model">Importiertes Modell · %1$s</string>
   <string name="already_installed">Installiert · Download installiert dieses Modell erneut</string>

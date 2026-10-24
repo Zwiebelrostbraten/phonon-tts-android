@@ -1,6 +1,8 @@
 package ai.gradium.phonon.tts
 
 import android.os.Build
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -35,7 +37,7 @@ internal data class SettingsUiState(
     val confirmReplacement: Boolean = false, val licenseText: String? = null
 )
 internal data class SettingsActions(
-    val selectInstalled: (String) -> Unit, val preferModel: () -> Unit,
+    val selectInstalled: (String) -> Unit,
     val selectModel: (Int) -> Unit, val selectVoice: (Int) -> Unit,
     val editSample: (String) -> Unit, val changeRate: (Int) -> Unit,
     val editToken: (String) -> Unit, val saveToken: () -> Unit, val deleteToken: () -> Unit,
@@ -101,11 +103,28 @@ internal fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
                                 }
                                 Text(state.status, Modifier.weight(1f).semantics { liveRegion = LiveRegionMode.Polite }, style = MaterialTheme.typography.headlineSmall, color = if (state.error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface)
                             }
-                            state.installed.forEach { entry ->
-                                OutlinedCard(onClick = { actions.selectInstalled(entry.id) }, enabled = !state.busy) {
-                                    Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                                        RadioButton(selected = entry.id == state.selectedInstalled, onClick = null)
-                                        Column { Text(entry.label); Text(entry.details, style = MaterialTheme.typography.bodySmall) }
+                            Column(Modifier.fillMaxWidth().selectableGroup(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                state.installed.forEach { entry ->
+                                    val selected = entry.id == state.selectedInstalled
+                                    OutlinedCard(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        shape = MaterialTheme.shapes.medium,
+                                        colors = CardDefaults.outlinedCardColors(containerColor = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface)
+                                    ) {
+                                        Row(
+                                            Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                                                .selectable(selected = selected, enabled = !state.busy, role = Role.RadioButton, onClick = { actions.selectInstalled(entry.id) })
+                                                .padding(12.dp),
+                                            verticalAlignment = Alignment.Top,
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            RadioButton(selected = selected, onClick = null, enabled = !state.busy,
+                                                modifier = Modifier.size(24.dp).clearAndSetSemantics { })
+                                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                                Text(entry.label, style = MaterialTheme.typography.titleMedium)
+                                                Text(entry.details, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -119,7 +138,6 @@ internal fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
                             Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 SectionLabel(stringResource(R.string.voice_preview))
                                 VoiceSelect(state, actions)
-                                OutlinedButton(onClick = actions.preferModel) { Text(stringResource(R.string.prefer_language)) }
                                 OutlinedTextField(value = state.sample, onValueChange = actions.editSample, label = { Text(stringResource(R.string.sample_text)) }, modifier = Modifier.fillMaxWidth(), minLines = 3, maxLines = 7, shape = MaterialTheme.shapes.medium)
                                 Column {
                                     val rateLabel = stringResource(R.string.preview_rate, state.rate)
