@@ -30,7 +30,7 @@
   <string name="preview">Vorschau sprechen</string>
   <string name="stop_preview">Vorschau stoppen</string>
   <string name="licenses">Lizenzen (offline)</string>
-  <string name="about_fork">0.4.1-android.11 · Community-Fork · Offline-Sprachausgabe</string>
+  <string name="about_fork">1.0.0 · Community-Fork · Offline-Sprachausgabe</string>
   <string name="installed_model">Installierte Modelle</string>
   <string name="installed_details">%1$s · %2$.1f MB auf dem Gerät</string>
   <string name="model_actions">Download-Katalog · 7 Modelle</string>

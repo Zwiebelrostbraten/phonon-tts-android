@@ -25,9 +25,9 @@ cargo install cargo-ndk
 
 `android/build.sh` rebuilds `ptts-ffi` for arm64-v8a and x86_64 and replaces `android/jniLibs/`. These generated libraries are not tracked in Git; a fresh checkout needs real native builds, not placeholder libraries. Existing validated libraries can be reused for app-only work.
 
-`package-preview.sh` validates resources, builds the minified release, runs selected JVM tests, checks packaged native architectures/JNA, voice metadata and notices, and checks APK alignment. Its current outputs are **`Phonon-TTS-v0.4.1-android.11.apk` and its `.sha256` sidecar in the repository’s parent directory**. The script contains explicit versioned output names; changing documentation does not change the app version. When the previous preview APK exists there, it also verifies update compatibility. Nothing is uploaded by the script.
+`package-preview.sh` validates resources, builds the minified release, runs selected JVM tests, checks packaged native architectures/JNA, voice metadata and notices, and checks APK alignment. Its current outputs are **`Phonon-TTS-v1.0.0.apk` and its `.sha256` sidecar in the repository’s parent directory**. The script contains explicit versioned output names; changing documentation does not change the app version. The historical manual script name is retained for stable releases. When the .11 APK exists there, it also verifies update compatibility. Nothing is uploaded by the script.
 
-The release build currently uses Gradle’s **debug signing configuration**. Published previews use an established local debug key that is not in Git. A build elsewhere normally receives a different certificate and cannot update an installed published preview in place. Preserve the original installation and data when investigating signature mismatches. Do not commit or distribute private signing keys, credentials or local SDK configuration.
+The release build currently uses Gradle’s **debug signing configuration**. Stable 1.0.0 retains the established local Android Debug certificate used by previews, by user choice. A minified, nondebuggable release build and a stable GitHub tag do not change the signer certificate name. The private key and its local backups must never enter Git. A build elsewhere normally receives a different certificate and cannot update an installed published preview in place. Preserve the original installation and data when investigating signature mismatches. Do not commit or distribute private signing keys, credentials or local SDK configuration.
 
 R8 rules in [proguard-rules.pro](../android/tts-engine/proguard-rules.pro) preserve JNA reflection. Do not remove them when changing packaging.
 
@@ -55,7 +55,7 @@ PHONON_LIVE_VOICES=1 ./android/tts-engine/gradlew -p android/tts-engine \
   testDebugUnitTest --tests ai.gradium.phonon.tts.VoiceCatalogPolicyTest --rerun-tasks --console=plain
 ```
 
-This makes public network requests; no gated-model token is needed. See [Update 11 validation](../android/tts-engine/UPDATE11_VALIDATION.md) for recorded evidence and limitations. Host tests and downloaded voice validation do not establish Android runtime behavior.
+This makes public network requests; no gated-model token is needed. See [1.0.0 validation](../android/tts-engine/RELEASE_1.0.0_VALIDATION.md) and the historical [Update 11 validation](../android/tts-engine/UPDATE11_VALIDATION.md) for recorded evidence and limitations. Host tests and downloaded voice validation do not establish Android runtime behavior.
 
 ## Device smoke checks
 

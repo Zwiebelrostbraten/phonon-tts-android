@@ -30,7 +30,7 @@
   <string name="preview">Écouter l’aperçu</string>
   <string name="stop_preview">Arrêter l’aperçu</string>
   <string name="licenses">Licences hors ligne</string>
-  <string name="about_fork">0.4.1-android.11 · Version communautaire · Synthèse hors ligne</string>
+  <string name="about_fork">1.0.0 · Version communautaire · Synthèse hors ligne</string>
   <string name="installed_model">Modèles installés</string>
   <string name="installed_details">%1$s · %2$.1f MB sur l’appareil</string>
   <string name="model_actions">Catalogue · 7 modèles</string>

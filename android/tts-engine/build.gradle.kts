@@ -27,8 +27,8 @@ android {
         targetSdk = 36
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
         resourceConfigurations += listOf("en", "de", "fr", "es", "pt")
-        versionCode = 12
-        versionName = "0.4.1-android.11"
+        versionCode = 13
+        versionName = "1.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     // What android/build.sh writes.
@@ -36,7 +36,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            // So a release build installs for testing. Sign a published build with your own key.
+            // Preserve the established local signer for in-place updates; never commit its key.
             signingConfig = signingConfigs.getByName("debug")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

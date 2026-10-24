@@ -2,13 +2,13 @@
 
 # Phonon TTS für Android
 
-**[English](README.md)** · Android 7+ · Fünf Sprachen · Community-Vorabversion
+**[English](README.md)** · Android 7+ · Fünf Sprachen · Stabile Community-Version
 
 Eine Android-Systemsprachausgabe auf Basis von [Gradium Phonon](https://github.com/gradium-ai/xn-ptts). Nach dem einmaligen Modelldownload entstehen Sprache und Audio lokal auf der CPU. Auch Apps, die Androids TextToSpeech-Dienst verwenden, können die Engine nutzen. Dieser Community-Fork ist keine offizielle Gradium-App.
 
-**[APK herunterladen](https://github.com/Zwiebelrostbraten/phonon-tts-android/releases/download/android-v0.4.1-11/Phonon-TTS-v0.4.1-android.11.apk)** · [Versionshinweise](https://github.com/Zwiebelrostbraten/phonon-tts-android/releases/tag/android-v0.4.1-11) · [Installation](#installation) · [Modelle](#modelle) · [Stimmen](#stimmen) · [Datenschutz](#datenschutz) · [Entwicklung](docs/android-development.md)
+**[APK herunterladen](https://github.com/Zwiebelrostbraten/phonon-tts-android/releases/download/v1.0.0/Phonon-TTS-v1.0.0.apk)** · [Versionshinweise](https://github.com/Zwiebelrostbraten/phonon-tts-android/releases/tag/v1.0.0) · [Installation](#installation) · [Modelle](#modelle) · [Stimmen](#stimmen) · [Datenschutz](#datenschutz) · [Entwicklung](docs/android-development.md)
 
-Aktuelle Vorabversion: **0.4.1-android.11** (versionCode 12). Die Veröffentlichungen sind als Prerelease markiert. Verwende die direkten Links oben oder [alle Veröffentlichungen](https://github.com/Zwiebelrostbraten/phonon-tts-android/releases).
+Aktuelle stabile Community-Fork-Version: **1.0.0** (versionCode 13), auf Basis der Runtime 0.4.1. Dies ist keine offizielle Gradium-Veröffentlichung. Siehe [alle Veröffentlichungen](https://github.com/Zwiebelrostbraten/phonon-tts-android/releases).
 
 ## Funktionen
 
@@ -21,7 +21,7 @@ Aktuelle Vorabversion: **0.4.1-android.11** (versionCode 12). Die Veröffentlich
 
 1. Lade die APK oben herunter. Erforderlich sind Android 7+ (API 24) und ARM64 oder x86_64. Die ARM64-Version benötigt **dotprod und FP16 (ARMv8.2)**; 64 Bit allein reichen nicht. Die Berechnung läuft auf der CPU.
 2. Öffne die APK. Erlaube bei Bedarf die Installation durch den verwendeten Browser oder Dateimanager. Diese Quellenberechtigung ist etwas anderes als eine Warnung vor einer schädlichen App: Bei einer Sicherheitswarnung abbrechen und Herkunft sowie Versionsinformationen prüfen; Play Protect nicht deaktivieren.
-3. Installiere über die vorhandene Vorabversion. Modelle, Stimmen, Einstellungen und gespeicherter Token bleiben dabei erhalten. Nicht deinstallieren und keine App-Daten löschen. Die veröffentlichten Vorabversionen verwenden denselben Debug-Signaturschlüssel, auch dieser mit R8 verkleinerte Release-Build.
+3. Installiere über die vorhandene Vorabversion. Modelle, Stimmen, Einstellungen und gespeicherter Token bleiben dabei erhalten. Nicht deinstallieren und keine App-Daten löschen. Die stabile Version 1.0.0 behält das bestehende Android-Debug-Zertifikat der Vorabversionen; der Release-Build ist mit R8 verkleinert und nicht debuggable.
 4. Öffne Phonon TTS und lade ein Modell herunter. **phonon-31m-en** ermöglicht Englisch ohne Konto. Für die zugangsbeschränkten Modelle gelten die Schritte im nächsten Abschnitt.
 5. Wähle installiertes Modell, gesprochene Sprache und Stimme und spiele die Hörprobe ab. Zusätzliche Stimmpakete sind optional und werden separat geladen.
 6. Suche in den Android-Einstellungen nach **Text-in-Sprache-Ausgabe**, wähle **Phonon TTS** als bevorzugte Engine und teste die Systemhörprobe. Bezeichnungen unterscheiden sich je nach Gerät. Die Lese-App muss Android-System-TTS unterstützen.
@@ -70,7 +70,7 @@ Kindle-Unterstützung hängt vom Buch, der App, dem Gerät und der verfügbaren 
 
 ## Entwicklung und Projektumfang
 
-[Build-Anleitung und Gerätetests](docs/android-development.md), [Beiträge](CONTRIBUTING.md), [Sicherheitsmeldungen](SECURITY.md) und [letzte dokumentierte Validierung](android/tts-engine/UPDATE11_VALIDATION.md) sind auf Englisch verfügbar. Host-Prüfungen bestätigen kein Android-Geräteverhalten: Native Lebenszyklen, Löschdialoge und Reader-Integration müssen noch auf Geräten bestätigt werden.
+[Build-Anleitung und Gerätetests](docs/android-development.md), [Beiträge](CONTRIBUTING.md), [Sicherheitsmeldungen](SECURITY.md) und [Validierung für 1.0.0](android/tts-engine/RELEASE_1.0.0_VALIDATION.md) sind auf Englisch verfügbar. Ein Nutzer hat Downloads, Offline-Sprachausgabe, Modellwechsel, Löschen und Neustart-Verhalten der vorherigen Vorabversion bestätigt. Host-Prüfungen ersetzen keine Gerätetests; weitere Geräte und Reader-Integration sind nicht umfassend geprüft.
 
 - `android/tts-engine/` — App, Compose-Einstellungen, System-TTS-Dienst und Host-Tests.
 - `android/PhononTTS.kt` — gemeinsamer nativer Kotlin-Wrapper; `android/build.sh` baut die CPU-Bibliotheken.

@@ -2,13 +2,13 @@
 
 # Phonon TTS for Android
 
-**[Deutsch — vollständige Anleitung](README.de.md)** · Android 7+ · Five languages · Community preview
+**[Deutsch — vollständige Anleitung](README.de.md)** · Android 7+ · Five languages · Stable community release
 
 An Android system text-to-speech engine based on [Gradium Phonon](https://github.com/gradium-ai/xn-ptts). Install models once and synthesize speech locally on the CPU, including from apps that use Android’s TextToSpeech service. This community fork is not an official Gradium app.
 
-**[Download APK](https://github.com/Zwiebelrostbraten/phonon-tts-android/releases/download/android-v0.4.1-11/Phonon-TTS-v0.4.1-android.11.apk)** · [Release notes](https://github.com/Zwiebelrostbraten/phonon-tts-android/releases/tag/android-v0.4.1-11) · [Install](#install) · [Models](#models) · [Voices](#voices) · [Privacy](#privacy) · [Development](docs/android-development.md)
+**[Download APK](https://github.com/Zwiebelrostbraten/phonon-tts-android/releases/download/v1.0.0/Phonon-TTS-v1.0.0.apk)** · [Release notes](https://github.com/Zwiebelrostbraten/phonon-tts-android/releases/tag/v1.0.0) · [Install](#install) · [Models](#models) · [Voices](#voices) · [Privacy](#privacy) · [Development](docs/android-development.md)
 
-Current preview: **0.4.1-android.11** (versionCode 12). Releases are marked as prereleases; use the links above or [all releases](https://github.com/Zwiebelrostbraten/phonon-tts-android/releases).
+Current stable community-fork release: **1.0.0** (versionCode 13), based on runtime 0.4.1. This is not an official Gradium release. See [all releases](https://github.com/Zwiebelrostbraten/phonon-tts-android/releases).
 
 ## What the app supports
 
@@ -21,7 +21,7 @@ Current preview: **0.4.1-android.11** (versionCode 12). Releases are marked as p
 
 1. Download the APK above. Android 7+ (API 24) and ARM64 or x86_64 are required. The ARM64 build needs **dotprod and FP16 (ARMv8.2)**; a 64-bit phone alone is insufficient. This APK uses CPU inference.
 2. Open the APK and, if prompted, allow installation from the browser or file manager you used. This source permission differs from a harmful-app warning: if a security warning appears, stop and verify the download and release information; do not disable Play Protect.
-3. Install over the existing preview to retain models, voices, preferences and the saved token. Do not uninstall or clear app data. Published previews use the same debug signing key, including this minified release build.
+3. Install over the existing preview to retain models, voices, preferences and the saved token. Do not uninstall or clear app data. Stable 1.0.0 retains the previews’ established Android Debug certificate; the release build is minified and nondebuggable.
 4. Open Phonon TTS and download a model. Start with **phonon-31m-en** for English without an account. For gated models, follow the access steps below.
 5. Select the installed model, spoken language and voice; try the sample. Voice packs are optional, separate downloads.
 6. In Android settings, search for **Text-to-speech output**, select **Phonon TTS** as the preferred engine and play the system sample. Setting names vary by device. Your reader must support Android system TTS.
@@ -70,7 +70,7 @@ Kindle behavior depends on the book, app, device and available Assistive Reader 
 
 ## Development and project scope
 
-See [build instructions and smoke checks](docs/android-development.md), [contributing](CONTRIBUTING.md), [security reporting](SECURITY.md) and the [latest recorded validation](android/tts-engine/UPDATE11_VALIDATION.md). Host checks do not establish Android device behavior; native lifecycle, deletion UI and reader integration still need device confirmation.
+See [build instructions and smoke checks](docs/android-development.md), [contributing](CONTRIBUTING.md), [security reporting](SECURITY.md) and the [1.0.0 validation record](android/tts-engine/RELEASE_1.0.0_VALIDATION.md). Core download, offline speech, model switching, deletion and restart checks on the preceding preview were confirmed by a user. Host checks do not replace device testing; broader device compatibility and reader integration are not exhaustively verified.
 
 - `android/tts-engine/` — Android app, Compose settings, system TTS service and host tests.
 - `android/PhononTTS.kt` — shared Kotlin native wrapper; `android/build.sh` builds CPU libraries.

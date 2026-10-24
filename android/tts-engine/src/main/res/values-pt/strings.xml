@@ -30,7 +30,7 @@
   <string name="preview">Ouvir prévia</string>
   <string name="stop_preview">Parar prévia</string>
   <string name="licenses">Licenças offline</string>
-  <string name="about_fork">0.4.1-android.11 · Versão comunitária · Voz offline</string>
+  <string name="about_fork">1.0.0 · Versão comunitária · Voz offline</string>
   <string name="installed_model">Modelos instalados</string>
   <string name="installed_details">%1$s · %2$.1f MB no dispositivo</string>
   <string name="model_actions">Catálogo · 7 modelos</string>

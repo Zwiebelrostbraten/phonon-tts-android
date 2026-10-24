@@ -34,7 +34,7 @@ with zipfile.ZipFile(apk) as archive:
     assert archive.getinfo('assets/licenses/German-Voices-NOTICE.txt').file_size > 100
     for name in ['LICENSE-MIT' ,'LICENSE-APACHE','Sonic-LICENSE.txt','NOTICE.txt']:
         assert archive.getinfo(f'assets/licenses/{name}').file_size > 100
-out = destination / 'Phonon-TTS-v0.4.1-android.11.apk'
+out = destination / 'Phonon-TTS-v1.0.0.apk'
 shutil.copy2(apk,out)
 sha = hashlib.sha256(out.read_bytes()).hexdigest()
 checksum = out.with_name(out.name + '.sha256')
@@ -44,9 +44,9 @@ print(out)
 print(checksum.read_text(),end='')
 PY
 
-# Validate in-place preview compatibility when the previous release is available locally.
-if test -f "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.10.apk"; then
-    python3 "$APP_DIR/verify-update.py" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.11.apk" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.10.apk"
+# Validate in-place update compatibility when the previous release is available locally.
+if test -f "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.11.apk"; then
+    python3 "$APP_DIR/verify-update.py" "$ARTIFACT_DIR/Phonon-TTS-v1.0.0.apk" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.11.apk"
 fi
 
-"${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/opt/data/android/sdk}}/build-tools/36.0.0/zipalign" -c -P 16 4 "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.11.apk"
+"${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/opt/data/android/sdk}}/build-tools/36.0.0/zipalign" -c -P 16 4 "$ARTIFACT_DIR/Phonon-TTS-v1.0.0.apk"

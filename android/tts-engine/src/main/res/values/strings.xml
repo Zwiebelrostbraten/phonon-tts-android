@@ -30,7 +30,7 @@
   <string name="preview">Speak preview</string>
   <string name="stop_preview">Stop preview</string>
   <string name="licenses">Offline licenses</string>
-  <string name="about_fork">0.4.1-android.11 · Community fork · Offline speech</string>
+  <string name="about_fork">1.0.0 · Community fork · Offline speech</string>
   <string name="installed_model">Installed models</string>
   <string name="installed_details">%1$s · %2$.1f MB on device</string>
   <string name="model_actions">Download catalog · 7 models</string>
