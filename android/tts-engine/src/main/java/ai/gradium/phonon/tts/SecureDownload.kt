@@ -34,13 +34,20 @@ class SecureDownload(private val cancelled: () -> Boolean, private val progress:
     private fun checkCancelled() { if (cancelled()) throw CancellationException() }
 
     fun download(model: DownloadModel, token: String?, into: File) {
+        downloadFiles(model.repo, model.revision, model.files, token, into)
+    }
+
+    fun downloadFiles(repo: String, revision: String, files: List<ModelFile>, token: String?, into: File) {
+        require(repo.matches(Regex("gradium/[A-Za-z0-9-]+")) && revision.matches(Regex("[a-f0-9]{40}")))
+        val total = files.sumOf { it.size }
+        require(files.all { it.name.matches(Regex("(?:voices/)?[A-Za-z0-9_.-]+")) && ".." !in it.name && it.size > 0 })
         require(token == null || token.matches(Regex("hf_[A-Za-z0-9]{1,508}"))) { "Invalid HF read token format" }
-        require(model.total <= 80_000_000) { "Model exceeds size limit" }
-        require(into.usableSpace > model.total + 32L * 1024 * 1024) { "Not enough storage" }
+        require(total <= 80_000_000) { "Model exceeds size limit" }
+        require(into.usableSpace > total + 32L * 1024 * 1024) { "Not enough storage" }
         var completed = 0L
-        for (file in model.files) {
+        for (file in files) {
             checkCancelled()
-            var url = "https://huggingface.co/${model.repo}/resolve/${model.revision}/${file.name}"
+            var url = "https://huggingface.co/${repo}/resolve/${revision}/${file.name}"
             var connection: HttpsURLConnection? = null
             try {
                 for (hop in 0..5) {
@@ -66,6 +73,7 @@ class SecureDownload(private val cancelled: () -> Boolean, private val progress:
                     require(conn.contentType?.lowercase()?.contains("text/html") != true) { "Server returned HTML" }
                     require(conn.contentLengthLong == -1L || conn.contentLengthLong == file.size) { "Unexpected file length" }
                     val part = File(into, file.name + ".part")
+                    check(part.parentFile!!.isDirectory || part.parentFile!!.mkdirs())
                     try {
                         val digest = DownloadPolicy.digest(file)
                         var count = 0L
@@ -79,7 +87,7 @@ class SecureDownload(private val cancelled: () -> Boolean, private val progress:
                                     count += n
                                     require(count <= file.size) { "Download exceeds size limit" }
                                     digest.update(buffer, 0, n); output.write(buffer, 0, n)
-                                    progress(completed + count, model.total)
+                                    progress(completed + count, total)
                                 }
                                 output.fd.sync()
                             }

@@ -5,31 +5,30 @@ import android.system.Os
 import java.io.FileOutputStream
 import org.json.JSONObject
 import java.io.File
-import java.security.MessageDigest
 
 object BundledVoices {
-    private fun digest(bytes: ByteArray) = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
+    @Volatile private var catalog: List<BundledVoice>? = null
+    internal fun entries(context: Context): List<BundledVoice> = catalog ?: synchronized(this) {
+        catalog ?: run {
+            val array = JSONObject(context.assets.open("voices-manifest.json").bufferedReader().use { it.readText() }).getJSONArray("voices")
+            List(array.length()) { i -> val v = array.getJSONObject(i)
+                BundledVoice(v.getString("name"), v.getString("language"), v.getString("filename"), v.getLong("bytes"), v.getString("sha256"))
+            }.also { catalog = it }
+        }
+    }
     /** Only called before constructing a native handle, under the model lifecycle. Never replaces a user file. */
     fun install(context: Context, checkpoint: File, languages: List<String>) {
-        if ("de" !in languages) return
-        val entries = JSONObject(context.assets.open("german-voices/manifest.json").bufferedReader().use { it.readText() }).getJSONArray("voices")
+        val entries = VoiceCatalogPolicy.forLanguages(entries(context), languages)
         val voices = File(checkpoint, "voices").apply { check(isDirectory || mkdirs()) }
-        for (i in 0 until entries.length()) {
-            val entry = entries.getJSONObject(i)
-            val bytes = context.assets.open("german-voices/${entry.getString("name")}.safetensors").use { it.readBytes() }
-            val hash = entry.getString("sha256")
-            check(bytes.size.toLong() == entry.getLong("bytes") && digest(bytes) == hash) { "Invalid bundled voice" }
-            // Full content hash provides a stable namespace, even with imported voices of the same name.
-            val stem = "Gradium_${entry.getString("name")}_$hash"
-            val target = File(voices, "$stem.safetensors")
-            val embedding = File(checkpoint, "embeddings/$stem.safetensors")
-            if (target.exists()) { check(digest(target.readBytes()) == hash) { "Bundled voice name collision; preserve existing file" }; continue }
-            if (embedding.exists()) { check(digest(embedding.readBytes()) == hash); continue }
-            // A .part is invisible to the native loader, including after process death on API 24.
+        for (entry in entries) {
+            val target = File(voices, "${entry.stem}.safetensors")
+            if (VoicePackStore.existingCanonical(checkpoint, entry)) continue
+            val source = VoicePacks.available(context, entry) ?: continue
             val temporary = File(voices, ".${target.name}.part")
             try {
-                FileOutputStream(temporary).use { output -> output.write(bytes); output.fd.sync() }
-                check(!target.exists()) { "Voice appeared during installation" }
+                FileOutputStream(temporary).use { output -> source.inputStream().use { it.copyTo(output) }; output.fd.sync() }
+                check(VoicePackStore.verified(temporary, entry))
+                check(!VoicePackStore.existingCanonical(checkpoint, entry)) { "Voice appeared during installation" }
                 Os.rename(temporary.path, target.path)
             } finally { temporary.delete() }
         }
@@ -39,21 +38,22 @@ object BundledVoices {
         val names = linkedSetOf<String>()
         if(File(entry.directory,"default-voice.safetensors").isFile) names += "default"
         for(folder in listOf("voices","embeddings")) File(entry.directory,folder).listFiles()?.filter { it.isFile && it.name.endsWith(".safetensors") }?.sortedBy { it.name }?.forEach { names += it.name.removeSuffix(".safetensors") }
-        if(lang == "de") {
-            val manifest = JSONObject(context.assets.open("german-voices/manifest.json").bufferedReader().use { it.readText() }).getJSONArray("voices")
-            for(i in 0 until manifest.length()) { val v = manifest.getJSONObject(i); names += "Gradium_${v.getString("name")}_${v.getString("sha256")}" }
-        }
-        return names.filter { lang == "de" || !it.startsWith("Gradium_") }.ifEmpty { listOf("default") }
+        val catalog = entries(context)
+        names.removeAll { name -> catalog.firstOrNull { it.stem == name }?.let { voice ->
+            listOf("voices", "embeddings").none { folder -> VoicePackStore.cachedVerified(File(entry.directory, "$folder/$name.safetensors"), voice) }
+        } ?: false }
+        return VoiceCatalogPolicy.available(names.toList(), catalog, lang) { VoicePacks.available(context, it) != null }
     }
+
     fun selectedMetadata(context: Context, entry: Model.Entry, lang: String): String {
         val available = metadata(context,entry,lang)
-        return context.getSharedPreferences("voices",Context.MODE_PRIVATE).getString(lang,null)?.takeIf { it in available } ?: available.firstOrNull { it == "default" } ?: available.first()
+        return context.getSharedPreferences("voices",Context.MODE_PRIVATE).getString(lang,null)?.takeIf { it in available } ?: available.firstOrNull { it == "default" } ?: available.firstOrNull() ?: "default"
     }
     fun label(speaker: String): String = if (speaker.startsWith("Gradium_")) speaker.removePrefix("Gradium_").substringBefore('_') else speaker
     fun androidName(lang: String, speaker: String) = "$lang-${if (speaker.startsWith("Gradium_")) label(speaker) + " (Gradium)" else speaker}"
-    fun speakers(model: Model.Loaded, lang: String) = model.speakers.filter { lang == "de" || !it.startsWith("Gradium_") }
+    fun speakers(context: Context, model: Model.Loaded, lang: String) = VoiceCatalogPolicy.filter(model.speakers, entries(context), lang)
     fun selected(context: Context, model: Model.Loaded, lang: String): String? {
-        val available = speakers(model, lang)
+        val available = speakers(context, model, lang)
         return context.getSharedPreferences("voices", Context.MODE_PRIVATE).getString(lang, null)?.takeIf { it in available }
             ?: model.defaultSpeaker?.takeIf { it in available } ?: available.firstOrNull()
     }

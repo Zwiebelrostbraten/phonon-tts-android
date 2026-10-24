@@ -26,17 +26,17 @@ def manifest(apk):
 assert cert(new) == cert(previous), 'Certificate changed'
 new_info, new_permissions, badging = manifest(new)
 old_info, old_permissions, _ = manifest(previous)
-assert new_info == ('ai.gradium.phonon.tts', '10', '0.4.1-android.9'), new_info
+assert new_info == ('ai.gradium.phonon.tts', '11', '0.4.1-android.10'), new_info
 assert new_info[0] == old_info[0]
 assert new_permissions == old_permissions, (new_permissions, old_permissions)
 assert set(re.findall(r"'([^']+)'", re.search(r"^locales: (.+)$", badging, re.M).group(1))) == {"--_--", "de", "es", "fr", "pt"}, "Unexpected packaged locales"
 assert "minSdkVersion:'24'" in badging and "targetSdkVersion:'36'" in badging
 with zipfile.ZipFile(new) as current, zipfile.ZipFile(previous) as old:
-    names = [name for name in old.namelist() if name.endswith('.so') or name.startswith('assets/german-voices/')]
-    assert len([n for n in names if n.endswith('.safetensors')]) == 13
+    names = [name for name in old.namelist() if name.endswith('.so') or name == 'assets/german-voices/manifest.json']
+    assert not any(n.endswith('.safetensors') for n in current.namelist())
     for name in names:
         assert current.read(name) == old.read(name), f'Changed native/voice asset: {name}'
-print('PASS: application ID, version 10/.9, certificate, permissions, SDK levels; all native libraries and 13 German embeddings byte-identical to .8')
+print('PASS: application ID, version 11/.10, certificate, permissions, SDK levels; all native libraries and German identity manifest byte-identical; zero embedding binaries')
 print('Certificate SHA-256:', cert(new))
 print('Size:', new.stat().st_size)
 print('APK SHA-256:', hashlib.sha256(new.read_bytes()).hexdigest())

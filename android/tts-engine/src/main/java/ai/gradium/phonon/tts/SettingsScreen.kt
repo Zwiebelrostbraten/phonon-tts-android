@@ -31,12 +31,14 @@ internal data class SettingsUiState(
     val ready: Boolean = false, val busy: Boolean = false, val loading: Boolean = false,
     val error: Boolean = false, val status: String = "", val installedDetails: String = "",
     val operation: String = "", val selectedModel: Int = 0,
+    val packLabel: String = "", val packReady: Boolean = false,
     val voices: List<Pair<String, String>> = emptyList(), val selectedVoice: Int = 0,
     val sample: String = "", val rate: Int = 100, val speaking: Boolean = false,
     val previewError: String = "", val token: String = "", val tokenStatus: String = "",
     val confirmReplacement: Boolean = false, val licenseText: String? = null
 )
 internal data class SettingsActions(
+    val downloadPack: () -> Unit,
     val selectInstalled: (String) -> Unit,
     val selectModel: (Int) -> Unit, val selectVoice: (Int) -> Unit,
     val editSample: (String) -> Unit, val changeRate: (Int) -> Unit,
@@ -106,26 +108,8 @@ internal fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
                             Column(Modifier.fillMaxWidth().selectableGroup(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 state.installed.forEach { entry ->
                                     val selected = entry.id == state.selectedInstalled
-                                    OutlinedCard(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        shape = MaterialTheme.shapes.medium,
-                                        colors = CardDefaults.outlinedCardColors(containerColor = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface)
-                                    ) {
-                                        Row(
-                                            Modifier.fillMaxWidth().heightIn(min = 48.dp)
-                                                .selectable(selected = selected, enabled = !state.busy, role = Role.RadioButton, onClick = { actions.selectInstalled(entry.id) })
-                                                .padding(12.dp),
-                                            verticalAlignment = Alignment.Top,
-                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                        ) {
-                                            RadioButton(selected = selected, onClick = null, enabled = !state.busy,
-                                                modifier = Modifier.size(24.dp).clearAndSetSemantics { })
-                                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                                Text(entry.label, style = MaterialTheme.typography.titleMedium)
-                                                Text(entry.details, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                            }
-                                        }
-                                    }
+                                    ModelChoiceRow(entry.label, entry.details, selected, !state.busy,
+                                        onClick = { actions.selectInstalled(entry.id) })
                                 }
                             }
                             if (state.busy || state.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -138,6 +122,10 @@ internal fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
                             Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 SectionLabel(stringResource(R.string.voice_preview))
                                 VoiceSelect(state, actions)
+                                if (state.packLabel.isNotBlank()) {
+                                    if (state.packReady) Text(stringResource(R.string.voice_pack_available), style = MaterialTheme.typography.bodySmall)
+                                    else TextButton(onClick = actions.downloadPack, enabled = !state.busy) { Text(state.packLabel) }
+                                }
                                 OutlinedTextField(value = state.sample, onValueChange = actions.editSample, label = { Text(stringResource(R.string.sample_text)) }, modifier = Modifier.fillMaxWidth(), minLines = 3, maxLines = 7, shape = MaterialTheme.shapes.medium)
                                 Column {
                                     val rateLabel = stringResource(R.string.preview_rate, state.rate)
@@ -170,18 +158,18 @@ internal fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
         if (modelsOpen) ModalBottomSheet(onDismissRequest = { modelsOpen = false }) {
             Column(Modifier.widthIn(max = 720.dp).fillMaxWidth().verticalScroll(rememberScrollState()).imePadding().padding(horizontal = 24.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 SectionLabel(stringResource(R.string.model_actions))
-                ModelCatalog.all.forEachIndexed { index, model ->
-                    val selected = state.selectedModel == index
-                    OutlinedCard(onClick = { actions.selectModel(index) }, enabled = !state.busy, modifier = Modifier.fillMaxWidth().semantics { this.selected = selected; role = Role.RadioButton }, colors = CardDefaults.outlinedCardColors(containerColor = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface)) {
-                        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(selected = selected, onClick = null)
-                            Column(Modifier.padding(start = 12.dp)) {
-                                Text(stringResource(model.label), style = MaterialTheme.typography.titleMedium)
-                                if(model.id in state.installedCatalog) Text(stringResource(R.string.already_installed), style = MaterialTheme.typography.labelMedium)
-                                if (model.languages.size == 1 && model.languages.first() == recommendedLanguage) Text(stringResource(R.string.recommended), style = MaterialTheme.typography.labelMedium)
-                                Text(stringResource(R.string.model_details, model.total / 1_000_000.0, if (model.gated) "CC-BY-NC 4.0" else "Apache 2.0"), style = MaterialTheme.typography.bodySmall)
-                            }
-                        }
+                Column(Modifier.fillMaxWidth().selectableGroup(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ModelCatalog.all.forEachIndexed { index, model ->
+                        ModelChoiceRow(
+                            stringResource(model.label),
+                            stringResource(R.string.model_details, model.total / 1_000_000.0, if (model.gated) "CC-BY-NC 4.0" else "Apache 2.0"),
+                            state.selectedModel == index, !state.busy,
+                            onClick = { actions.selectModel(index) },
+                            annotations = listOfNotNull(
+                                if (model.id in state.installedCatalog) stringResource(R.string.already_installed) else null,
+                                if (model.languages.size == 1 && model.languages.first() == recommendedLanguage) stringResource(R.string.recommended) else null
+                            )
+                        )
                     }
                 }
                 val model = ModelCatalog.all[state.selectedModel]
@@ -226,6 +214,27 @@ internal fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
             modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable).fillMaxWidth())
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             state.voices.forEachIndexed { index, voice -> DropdownMenuItem(text = { Text(label(voice)) }, onClick = { actions.selectVoice(index); expanded = false }) }
+        }
+    }
+}
+
+/** The radio is centered against the complete text block in both model pickers. */
+@Composable
+private fun ModelChoiceRow(title: String, details: String, selected: Boolean, enabled: Boolean,
+    onClick: () -> Unit, annotations: List<String> = emptyList()) {
+    OutlinedCard(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.outlinedCardColors(containerColor = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface)) {
+        Row(Modifier.fillMaxWidth().heightIn(min = 48.dp)
+            .selectable(selected = selected, enabled = enabled, role = Role.RadioButton, onClick = onClick)
+            .padding(12.dp), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            RadioButton(selected = selected, onClick = null, enabled = enabled,
+                modifier = Modifier.size(24.dp).clearAndSetSemantics { })
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(title, style = MaterialTheme.typography.titleMedium)
+                Text(details, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                annotations.forEach { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+            }
         }
     }
 }

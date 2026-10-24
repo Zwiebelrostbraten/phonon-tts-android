@@ -11,7 +11,7 @@ for abi in arm64-v8a x86_64; do
     }
 done
 python3 "$APP_DIR/validate-resources.py"
-"$APP_DIR/gradlew" -p "$APP_DIR" assembleRelease testDebugUnitTest --tests ai.gradium.phonon.tts.FocusedTest --tests ai.gradium.phonon.tts.ProgressTest --tests ai.gradium.phonon.tts.SettingsStateTest --tests ai.gradium.phonon.tts.InventoryTest --tests ai.gradium.phonon.tts.SelectionPolicyTest --console=plain
+"$APP_DIR/gradlew" -p "$APP_DIR" assembleRelease testDebugUnitTest --tests ai.gradium.phonon.tts.FocusedTest --tests ai.gradium.phonon.tts.ProgressTest --tests ai.gradium.phonon.tts.SettingsStateTest --tests ai.gradium.phonon.tts.InventoryTest --tests ai.gradium.phonon.tts.SelectionPolicyTest --tests ai.gradium.phonon.tts.VoiceCatalogPolicyTest --tests ai.gradium.phonon.tts.VoicePackStoreTest --console=plain
 python3 - "$APP_DIR" "$ARTIFACT_DIR" <<'PY'
 import json, hashlib, pathlib, shutil, struct, sys, zipfile
 app, destination = map(pathlib.Path, sys.argv[1:])
@@ -23,28 +23,30 @@ with zipfile.ZipFile(apk) as archive:
         assert len(data) > 100000 and data[:5] == b'\x7fELF\x02', f'Invalid native library: {name}'
         assert struct.unpack_from('<H',data,18)[0] == machine, f'Wrong architecture: {name}'
         assert archive.getinfo(f'lib/{abi}/libjnidispatch.so').file_size > 10000
-    manifest_bytes = archive.read('assets/german-voices/manifest.json')
+    manifest_bytes = archive.read('assets/voices-manifest.json')
     manifest = json.loads(manifest_bytes)
-    assert manifest_bytes == (app / 'src/main/assets/german-voices/manifest.json').read_bytes()
-    assert len(manifest['voices']) == 13
+    assert manifest_bytes == (app / 'src/main/assets/voices-manifest.json').read_bytes()
+    assert len(manifest['voices']) == 102
     assert manifest['revision'] == '0ee17205f254b5abc43b266c8a0f215565c352f7'
-    for voice in manifest['voices']:
-        data = archive.read(f"assets/german-voices/{voice['name']}.safetensors")
-        assert len(data) == voice['bytes'] and hashlib.sha256(data).hexdigest() == voice['sha256']
-    assert sum(v['bytes'] for v in manifest['voices']) == 3329768
+    assert sum(v['bytes'] for v in manifest['voices']) == 26125872
+    assert not any(n.endswith('.safetensors') for n in archive.namelist())
+    assert archive.getinfo('assets/licenses/Voices-NOTICE.txt').file_size > 100
     assert archive.getinfo('assets/licenses/German-Voices-NOTICE.txt').file_size > 100
     for name in ['LICENSE-MIT' ,'LICENSE-APACHE','Sonic-LICENSE.txt','NOTICE.txt']:
         assert archive.getinfo(f'assets/licenses/{name}').file_size > 100
-out = destination / 'Phonon-TTS-v0.4.1-android.9.apk'
+out = destination / 'Phonon-TTS-v0.4.1-android.10.apk'
 shutil.copy2(apk,out)
 sha = hashlib.sha256(out.read_bytes()).hexdigest()
 checksum = out.with_name(out.name + '.sha256')
 checksum.write_text(f'{sha}  {out.name}\n')
+print('APK bytes:', out.stat().st_size)
 print(out)
 print(checksum.read_text(),end='')
 PY
 
 # Validate in-place preview compatibility when the previous release is available locally.
-if test -f "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.8.apk"; then
-    python3 "$APP_DIR/verify-update.py" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.9.apk" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.8.apk"
+if test -f "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.9.apk"; then
+    python3 "$APP_DIR/verify-update.py" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.10.apk" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.9.apk"
 fi
+
+"${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/opt/data/android/sdk}}/build-tools/36.0.0/zipalign" -c -P 16 4 "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.10.apk"

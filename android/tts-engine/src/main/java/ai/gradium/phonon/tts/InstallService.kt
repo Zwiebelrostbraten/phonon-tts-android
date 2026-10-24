@@ -24,7 +24,7 @@ class InstallService : Service() {
         val task = synchronized(InstallService) { val next = pending; pending = null; next }
         if (task == null) { if (!running) stopSelf(); return START_NOT_STICKY }
         thread(name = "model-install") {
-            try { task(); message = getString(R.string.install_complete) }
+            try { task.run(); message = getString(task.successMessage) }
             catch (e: CancellationException) { message = getString(R.string.cancelled) }
             catch (t: Throwable) { message = if (cancelled) getString(R.string.cancelled) else getString(R.string.operation_failed) }
             finally {
@@ -43,15 +43,20 @@ class InstallService : Service() {
         @Volatile var cancelled = false; private set
         @Volatile var message = ""; private set
         @Volatile private var downloader: SecureDownload? = null
-        private var pending: (() -> Unit)? = null
-        @Synchronized fun start(context: Context, task: () -> Unit): Boolean {
+        private data class Operation(val successMessage: Int, val run: () -> Unit)
+        private var pending: Operation? = null
+        @Synchronized fun start(context: Context, successMessage: Int = R.string.install_complete, task: () -> Unit): Boolean {
             if (running || Model.installing) return false
-            running = true; cancelled = false; message = context.getString(R.string.installing_model); pending = task
+            running = true; cancelled = false; message = context.getString(R.string.installing_model); pending = Operation(successMessage, task)
             try {
                 val intent = Intent(context, InstallService::class.java)
                 if (Build.VERSION.SDK_INT >= 26) context.startForegroundService(intent) else context.startService(intent)
             } catch (t: Throwable) { pending = null; running = false; throw t }
             return true
+        }
+        internal fun packDownloader(client: SecureDownload) { downloader = client }
+        internal fun packProgress(context: Context, done: Long, total: Long) {
+            message = "${context.getString(R.string.download)}: ${done * 100 / total}% (${done / 1024} / ${total / 1024} KiB)"
         }
         fun cancel() { cancelled = true; downloader?.cancel() }
         fun checkCancelled() { if (cancelled) throw CancellationException() }

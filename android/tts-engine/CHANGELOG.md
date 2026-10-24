@@ -1,3 +1,10 @@
+## 0.4.1-android.10 (versionCode 11)
+
+- Shared, user-triggered public voice packs per language: 102 metadata entries; no embedding binaries in the APK. Pinned sizes and SHA-256, token-free download, cancellation, staging and rollback.
+- Preserve existing German identities and files; filter catalog voices by language and actual availability. Refresh native handles and preview voice caches after installation.
+- One centered, accessible model choice row for installed models and downloads; automatic language defaults on installed-model selection; all five UI locales.
+- Native libraries, signing identity and permissions retained from .9. Device runtime unverified.
+
 # Changelog
 
 ## 0.4.1-android.3 / 4

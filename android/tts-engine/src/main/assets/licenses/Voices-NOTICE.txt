@@ -1,0 +1,9 @@
+Public voice embeddings: Gradium / phonon-voices contributors.
+Source: https://huggingface.co/gradium/phonon-voices
+Pinned revision: 0ee17205f254b5abc43b266c8a0f215565c352f7
+License: Apache License 2.0 (see LICENSE-APACHE).
+Catalog metadata for 102 public embeddings, 26,125,872 bytes total: English 37, Spanish 25,
+German 13, French 15, Portuguese 12. No gated checkpoint weights.
+voices-manifest.json records official names, source filenames, language, asset paths,
+exact byte sizes and SHA-256 digests. Embedding binaries are downloaded on demand by language and are not included in this APK.
+Original German identities are preserved; installed files are retained.

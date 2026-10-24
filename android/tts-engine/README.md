@@ -1,10 +1,10 @@
 # Phonon TTS — Android community fork
 
-Community Android system TTS engine based on [Gradium Phonon](https://github.com/gradium-ai/xn-ptts). Current preview: **0.4.1-android.9**, versionCode **10**. The Rust runtime is unchanged.
+Community Android system TTS engine based on [Gradium Phonon](https://github.com/gradium-ai/xn-ptts). Current preview: **0.4.1-android.10**, versionCode **11**. The Rust runtime is unchanged.
 
 ## Install and use
 
-1. Install `Phonon-TTS-v0.4.1-android.9.apk` over the existing preview. The application ID (`ai.gradium.phonon.tts`) and Android Debug signing certificate are unchanged. Do not uninstall or clear app data: existing checkpoints, voice preferences and encrypted Hugging Face tokens are preserved.
+1. Install `Phonon-TTS-v0.4.1-android.10.apk` over the existing preview. The application ID (`ai.gradium.phonon.tts`) and Android Debug signing certificate are unchanged. Do not uninstall or clear app data: existing checkpoints, voice preferences and encrypted Hugging Face tokens are preserved.
 2. Open Phonon TTS. The installed list shows each checkpoint, its languages and local size. Selecting an installed entry loads it for preview and automatically makes it the default for every language it supports, preserving other language defaults. Select the spoken language/voice. Preview text changes to a sample in the selected spoken language.
 3. Choose a catalog model to download, or separately import a local checkpoint folder. Models coexist. Only reinstalling the same catalog identity requires confirmation. Cancellation or failed activation preserves all previous installations. Downloads run as foreground operations with progress and cancellation.
 4. Select Phonon TTS in Android speech settings. Available languages are the union of installed checkpoints. A requested language uses its saved preferred model, then a deterministic specialist-before-multilingual fallback. Explicit model-qualified voices take precedence. Unknown voices are not advertised or validated. Older voice names resolve only against known voices in the language default model.
@@ -26,7 +26,7 @@ All seven original CPU checkpoints use `model.q8.gguf`, with pinned revision, ex
 
 The llamacpp/audiocpp repositories are alternative conversions requiring other runtimes. `phonon-mimi` is codec-only. They are not extra usable language models in this CPU FFI. Q4 files are not offered or renamed to Q8.
 
-No model weights are bundled. The original 13 Apache-2.0 German embeddings remain byte-identical, pinned to `gradium/phonon-voices@0ee17205f254b5abc43b266c8a0f215565c352f7` (3,329,768 bytes). These appear only for German speech, including the multilingual checkpoint. Other languages have their checkpoint default and any imported voices; German embeddings are never offered as French voices. No additional voice pack is downloaded automatically.
+No checkpoint or voice weights are bundled. The APK carries metadata and Apache-2.0 attribution for 102 public voices pinned to `gradium/phonon-voices@0ee17205f254b5abc43b266c8a0f215565c352f7`: English 37 (9,477,032 bytes), Spanish 25 (6,403,400), German 13 (3,329,768), French 15 (3,842,040), Portuguese 12 (3,073,632). Use the action beside the selected voice to download that language once, without a Hugging Face token. Verified packs live in `filesDir/voice-packs/<language>` and are reused across model variants. Applicable verified voices are copied into a checkpoint before native activation; this can use additional disk space. Existing German checkpoint voices, saved identities, and imported voices remain available. Multilingual models list catalog voices only under their own language. Until a pack is available, only defaults and existing files are advertised. Downloads run in the foreground service with byte progress and cancellation; failed or cancelled staging does not replace an existing pack. Android device runtime remains unverified.
 
 ## Storage and lifecycle
 
@@ -44,6 +44,6 @@ Use the existing native libraries; this app update does not rebuild Rust. JDK 17
 TMPDIR=/your/scratch ./android/tts-engine/package-preview.sh
 ```
 
-The script checks 66 string keys and format placeholders in all five locales, localeConfig and all seven pinned catalogs. It runs the focused JVM classes `FocusedTest`, `ProgressTest`, `SettingsStateTest`, and `InventoryTest`, then builds the R8-minified, debug-signed release. Packaging verifies both ELF architectures, JNA, licenses and all 13 embedding hashes. APK and SHA-256 sidecar are copied to the repository parent directory. No publishing occurs.
+The script checks 68 string keys and format placeholders in all five locales, localeConfig and all seven pinned catalogs. It runs the focused JVM classes `FocusedTest`, `ProgressTest`, `SettingsStateTest`, `InventoryTest`, `SelectionPolicyTest`, `VoiceCatalogPolicyTest`, and `VoicePackStoreTest`, then builds the R8-minified, debug-signed release. Packaging verifies both ELF architectures, JNA, licenses the 102 pinned metadata entries, original German identities and absence of embedding binaries. APK and SHA-256 sidecar are copied to the repository parent directory. No publishing occurs.
 
 Host tests cover directory discovery/legacy recovery, cancellation, isolated rollback, routing/preferences/system locales, voice identities and invalid aliases, catalogs, audio markers/tempo, token encryption and download policy. Native activation is not simulated as success by fixtures. No device is available: Android speech, visual behavior, real update persistence and authenticated gated downloads remain untested. See the current section of [FORK_NOTES.md](FORK_NOTES.md) for build evidence.

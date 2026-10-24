@@ -30,7 +30,7 @@
   <string name="preview">Vorschau sprechen</string>
   <string name="stop_preview">Vorschau stoppen</string>
   <string name="licenses">Lizenzen (offline)</string>
-  <string name="about_fork">0.4.1-android.9 · Community-Fork · Offline-Sprachausgabe</string>
+  <string name="about_fork">0.4.1-android.10 · Community-Fork · Offline-Sprachausgabe</string>
   <string name="installed_model">Installierte Modelle</string>
   <string name="installed_details">%1$s · %2$.1f MB auf dem Gerät</string>
   <string name="model_actions">Download-Katalog · 7 Modelle</string>
@@ -66,4 +66,6 @@
   <string name="recommended">Passend zur Systemsprache</string>
   <string name="language_defaults">Standard für Sprachen: %1$s</string>
   <string name="default_voice">Standard</string>
+    <string name="download_voice_pack">Stimmen für %1$s laden · %2$d Stimmen · %3$.1f MB</string>
+    <string name="voice_pack_available">Stimmen für diese Sprache verfügbar</string>
 </resources>

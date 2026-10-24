@@ -1,6 +1,6 @@
-# Current update: 0.4.1-android.9 (versionCode 10)
+# Current update: 0.4.1-android.10 (versionCode 11)
 
-See README.md for the current multi-model contract. The records below are historical; single-model, eager loading and double-memory staging descriptions no longer apply. Current validation is recorded in UPDATE9_VALIDATION.md.
+See README.md for the shared on-demand voice pack contract and UPDATE10_VALIDATION.md for current build evidence. The records below are historical; references to bundled embeddings describe older APKs. The current APK has metadata for 102 voices and no embedding binaries.
 
 # Android fork implementation notes
 

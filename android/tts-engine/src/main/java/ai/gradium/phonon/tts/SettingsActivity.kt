@@ -42,6 +42,12 @@ class SettingsActivity : ComponentActivity() {
         setContent {
             SettingsScreen(ui, SettingsActions(
                 selectModel = { ui = ui.copy(selectedModel = it, token = "") },
+                downloadPack = {
+                    ui.voices.getOrNull(ui.selectedVoice)?.first?.let { language ->
+                        InstallService.start(this, R.string.voice_pack_available) { VoicePacks.download(applicationContext, language) }
+                        refresh()
+                    }
+                },
                 selectInstalled = { Model.select(this,it); refresh() },
                 selectVoice = { index -> ui.voices.getOrNull(index)?.let { BundledVoices.select(this, it.first, it.second) }; ui = ui.copy(selectedVoice = index, sample = Samples.text[ui.voices.getOrNull(index)?.first] ?: ui.sample) },
                 editSample = { ui = ui.copy(sample = it) },
@@ -59,7 +65,7 @@ class SettingsActivity : ComponentActivity() {
                 systemSettings = { startActivity(Intent("com.android.settings.TTS_SETTINGS")) },
                 confirmReplacement = { replacement.accept(busy()); ui = ui.copy(confirmReplacement = false); refresh() },
                 dismissReplacement = { replacement.cancel(); ui = ui.copy(confirmReplacement = false) },
-                licenses = { ui = ui.copy(licenseText = listOf("LICENSE-MIT", "LICENSE-APACHE", "Sonic-LICENSE.txt", "NOTICE.txt", "German-Voices-NOTICE.txt").joinToString("\n\n") { name -> name + "\n" + assets.open("licenses/$name").bufferedReader().use { it.readText() } }) },
+                licenses = { ui = ui.copy(licenseText = listOf("LICENSE-MIT", "LICENSE-APACHE", "Sonic-LICENSE.txt", "NOTICE.txt", "Voices-NOTICE.txt").joinToString("\n\n") { name -> name + "\n" + assets.open("licenses/$name").bufferedReader().use { it.readText() } }) },
                 dismissLicenses = { ui = ui.copy(licenseText = null) }
             ))
         }
@@ -122,6 +128,7 @@ class SettingsActivity : ComponentActivity() {
             } }, packageName)
         } else if (previewReady) request() else pendingPreview = request
     }
+    private var shownVoiceGeneration = -1
     private fun refresh() {
         val inventory = Model.entries(this)
         val selectedEntry = Model.selected(this)
@@ -134,13 +141,15 @@ class SettingsActivity : ComponentActivity() {
             ui = ui.copy(selectedModel = initialModelSelection(ModelCatalog.all.map { it.id == (current ?: recommended) }))
             initializedSelection = true
         }
-        if (selectedEntry !== shownModel) {
+        if (selectedEntry !== shownModel || shownVoiceGeneration != VoicePacks.generation) {
+            shownVoiceGeneration = VoicePacks.generation
             stopPreview(); previewGeneration++; preview?.shutdown(); preview = null; previewReady = false
             shownModel = selectedEntry
             val voices = selectedEntry?.let { entry -> entry.languages.flatMap { lang ->
                 BundledVoices.metadata(this,entry,lang).map { lang to it }
             } }.orEmpty()
-            val lang = Model.systemLanguage(this)?.takeIf { it in selectedEntry?.languages.orEmpty() }
+            val lang = ui.voices.getOrNull(ui.selectedVoice)?.first?.takeIf { it in selectedEntry?.languages.orEmpty() }
+                ?: Model.systemLanguage(this)?.takeIf { it in selectedEntry?.languages.orEmpty() }
                 ?: selectedEntry?.languages?.firstOrNull()
             val selected = selectedEntry?.let { entry -> voices.indexOfFirst { (code, speaker) ->
                 code == lang && speaker == BundledVoices.selectedMetadata(this,entry,code)
@@ -163,7 +172,12 @@ class SettingsActivity : ComponentActivity() {
                 if(defaults.isEmpty()) "" else "\n" + getString(R.string.language_defaults,defaults.joinToString(", "))
             InstalledChoice(entry.id,label,details)
         }
-        ui = ui.copy(installed = installed, selectedInstalled = selectedEntry?.id,
+        val packLanguage = ui.voices.getOrNull(ui.selectedVoice)?.first
+        val packEntries = packLanguage?.let { VoicePacks.entries(this, it) }.orEmpty()
+        ui = ui.copy(packReady = packLanguage?.let { VoicePacks.ready(this, it) } ?: false,
+            packLabel = if (packEntries.isEmpty()) "" else getString(R.string.download_voice_pack,
+                java.util.Locale.forLanguageTag(packLanguage!!).getDisplayLanguage(resources.configuration.locales[0]),
+                packEntries.size, packEntries.sumOf { it.bytes } / 1_000_000.0), installed = installed, selectedInstalled = selectedEntry?.id,
             installedCatalog = inventory.mapNotNull { it.catalog?.id }.toSet(),
             ready = selectedEntry != null && !busy(), busy = busy(), loading = state is Model.State.Loading,
             status = if (busy()) getString(R.string.installing_model) else status, error = state is Model.State.Failed,

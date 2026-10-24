@@ -2,6 +2,3 @@
 .kotlin/
 build/
 local.properties
-
-# Public bundled voice embeddings; model weights remain ignored.
-!/src/main/assets/german-voices/*.safetensors

@@ -83,6 +83,9 @@ object Model {
     fun load(context: Context): Future<*> = loader.submit { synchronized(lifecycle) { selected(context)?.let { activate(context,it) } } }
     fun await(context: Context): Loaded? = synchronized(lifecycle) { selected(context)?.let { activate(context,it) } }
     fun <T> use(context: Context, entry: Entry, work: (Loaded) -> T): T? = synchronized(lifecycle) { activate(context,entry)?.let(work) }
+    fun voicesChanged(language: String) = synchronized(lifecycle) {
+        if (VoiceCatalogPolicy.invalidates((state as? State.Ready)?.model?.languages.orEmpty(), language)) close()
+    }
     private fun close() { (state as? State.Ready)?.model?.tts?.close(); state = State.NotInstalled }
     private fun activate(context: Context, entry: Entry): Loaded? {
         (state as? State.Ready)?.model?.takeIf { it.id == entry.id }?.let { return it }

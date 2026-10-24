@@ -30,7 +30,7 @@
   <string name="preview">Ouvir prévia</string>
   <string name="stop_preview">Parar prévia</string>
   <string name="licenses">Licenças offline</string>
-  <string name="about_fork">0.4.1-android.9 · Versão comunitária · Voz offline</string>
+  <string name="about_fork">0.4.1-android.10 · Versão comunitária · Voz offline</string>
   <string name="installed_model">Modelos instalados</string>
   <string name="installed_details">%1$s · %2$.1f MB no dispositivo</string>
   <string name="model_actions">Catálogo · 7 modelos</string>
@@ -66,4 +66,6 @@
   <string name="recommended">Corresponde ao idioma do sistema</string>
   <string name="language_defaults">Idiomas padrão: %1$s</string>
   <string name="default_voice">Padrão</string>
+    <string name="download_voice_pack">Transferir vozes em %1$s · %2$d vozes · %3$.1f MB</string>
+    <string name="voice_pack_available">Vozes disponíveis para este idioma</string>
 </resources>
