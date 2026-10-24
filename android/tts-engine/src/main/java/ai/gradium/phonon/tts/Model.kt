@@ -88,6 +88,7 @@ object Model {
     }
     private fun close() { (state as? State.Ready)?.model?.tts?.close(); state = State.NotInstalled }
     private fun activate(context: Context, entry: Entry): Loaded? {
+        if (!Inventory(context.filesDir).live(entry.id, entry.directory)) return null
         (state as? State.Ready)?.model?.takeIf { it.id == entry.id }?.let { return it }
         close(); state = State.Loading
         return try {
@@ -104,7 +105,18 @@ object Model {
         val target = Inventory(context.filesDir).target(id)
         val staging = File(target.parentFile,target.name + ".staging")
         try {
-            synchronized(lifecycle) { CheckpointSwap.recover(target) }
+            synchronized(lifecycle) {
+                val marker = File(target.parentFile, target.name + ".deleted")
+                if (marker.exists()) {
+                    // A previous failed deletion is never an installation backup.
+                    for (suffix in listOf("", ".backup", ".staging")) {
+                        val old = File(target.parentFile, target.name + suffix)
+                        check(!old.exists() || old.deleteRecursively())
+                    }
+                    check(marker.deleteRecursively())
+                }
+                CheckpointSwap.recover(target)
+            }
             check(!staging.exists() || staging.deleteRecursively())
             check(staging.mkdirs())
             fill(staging)
@@ -134,6 +146,31 @@ object Model {
                 }
             }
         } finally { staging.deleteRecursively(); installing = false }
+    }
+    fun delete(context: Context, id: String) = synchronized(installLock) {
+        installing = true
+        try { synchronized(lifecycle) {
+            val inventory = Inventory(context.filesDir)
+            require(entries(context).any { it.id == id } && inventory.live(id, inventory.target(id)))
+            if ((state as? State.Ready)?.model?.id == id) close()
+            try { inventory.remove(id) } finally {
+                snapshot = discover(context)
+                if (snapshot!!.isEmpty() && state !is State.Ready) state = State.NotInstalled
+                if (snapshot!!.none { it.id == id }) {
+                    val preferences = prefs(context)
+                    val current = ModelSelection(preferences.getString("selected", null), preferences.all.mapNotNull { (key, value) ->
+                        if (key.startsWith("language-") && value is String) key.removePrefix("language-") to value else null
+                    }.toMap())
+                    val locales = context.resources.configuration.locales
+                    val next = SelectionPolicy.removed(snapshot!!.map { RouteModel(it.id,it.languages) }, id, current,
+                        (0 until locales.size()).map { locales[it].toLanguageTag() })
+                    preferences.edit().apply {
+                        if (next.selected == null) remove("selected") else putString("selected", next.selected)
+                        current.defaults.filterValues { it == id }.keys.forEach { remove("language-$it") }
+                    }.apply()
+                }
+            }
+        } } finally { installing = false }
     }
     fun code(language: String?): String? {
         if(language.isNullOrEmpty()) return null

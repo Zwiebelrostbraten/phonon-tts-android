@@ -41,6 +41,15 @@ class SettingsActivity : ComponentActivity() {
         updateTokenStatus()
         setContent {
             SettingsScreen(ui, SettingsActions(
+                deleteInstalled = { id ->
+                    if (!busy()) {
+                        val app = applicationContext
+                        localError = null
+                        stopPreview()
+                        InstallService.start(app, R.string.delete_model_complete, deletingModel = true) { Model.delete(app, id) }
+                        refresh()
+                    }
+                },
                 selectModel = { ui = ui.copy(selectedModel = it, token = "") },
                 downloadPack = {
                     ui.voices.getOrNull(ui.selectedVoice)?.first?.let { language ->
@@ -179,8 +188,8 @@ class SettingsActivity : ComponentActivity() {
                 java.util.Locale.forLanguageTag(packLanguage!!).getDisplayLanguage(resources.configuration.locales[0]),
                 packEntries.size, packEntries.sumOf { it.bytes } / 1_000_000.0), installed = installed, selectedInstalled = selectedEntry?.id,
             installedCatalog = inventory.mapNotNull { it.catalog?.id }.toSet(),
-            ready = selectedEntry != null && !busy(), busy = busy(), loading = state is Model.State.Loading,
-            status = if (busy()) getString(R.string.installing_model) else status, error = state is Model.State.Failed,
+            deleting = InstallService.deleting, ready = selectedEntry != null && !busy(), busy = busy(), loading = state is Model.State.Loading,
+            status = if (busy()) getString(if (InstallService.deleting) R.string.deleting_model else R.string.installing_model) else status, error = state is Model.State.Failed,
             operation = localError ?: InstallService.message,
             speaking = ui.speaking && preview?.isSpeaking == true)
     }

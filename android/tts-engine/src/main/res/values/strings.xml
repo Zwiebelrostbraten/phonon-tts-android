@@ -30,7 +30,7 @@
   <string name="preview">Speak preview</string>
   <string name="stop_preview">Stop preview</string>
   <string name="licenses">Offline licenses</string>
-  <string name="about_fork">0.4.1-android.10 · Community fork · Offline speech</string>
+  <string name="about_fork">0.4.1-android.11 · Community fork · Offline speech</string>
   <string name="installed_model">Installed models</string>
   <string name="installed_details">%1$s · %2$.1f MB on device</string>
   <string name="model_actions">Download catalog · 7 models</string>
@@ -68,4 +68,10 @@
   <string name="default_voice">Default</string>
     <string name="download_voice_pack">Download voices for %1$s · %2$d voices · %3$.1f MB</string>
     <string name="voice_pack_available">Language voices available</string>
+    <string name="delete_model_label">Delete model “%1$s”</string>
+    <string name="delete_model_message">Remove the installation of “%1$s” from this device? Only this model installation is removed. Shared voice packs are retained.</string>
+    <string name="delete_model_confirm">Delete</string>
+    <string name="deleting_model">Deleting model…</string>
+    <string name="delete_model_complete">Model deleted.</string>
+    <string name="delete_model_failed">Model deletion failed. Storage cleanup may not have fully freed storage. Check storage and try again.</string>
 </resources>

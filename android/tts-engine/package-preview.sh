@@ -11,7 +11,7 @@ for abi in arm64-v8a x86_64; do
     }
 done
 python3 "$APP_DIR/validate-resources.py"
-"$APP_DIR/gradlew" -p "$APP_DIR" assembleRelease testDebugUnitTest --tests ai.gradium.phonon.tts.FocusedTest --tests ai.gradium.phonon.tts.ProgressTest --tests ai.gradium.phonon.tts.SettingsStateTest --tests ai.gradium.phonon.tts.InventoryTest --tests ai.gradium.phonon.tts.SelectionPolicyTest --tests ai.gradium.phonon.tts.VoiceCatalogPolicyTest --tests ai.gradium.phonon.tts.VoicePackStoreTest --console=plain
+"$APP_DIR/gradlew" -p "$APP_DIR" assembleRelease testDebugUnitTest --tests ai.gradium.phonon.tts.FocusedTest --tests ai.gradium.phonon.tts.ProgressTest --tests ai.gradium.phonon.tts.SettingsStateTest --tests ai.gradium.phonon.tts.ModelDeletionTest --tests ai.gradium.phonon.tts.InventoryTest --tests ai.gradium.phonon.tts.SelectionPolicyTest --tests ai.gradium.phonon.tts.VoiceCatalogPolicyTest --tests ai.gradium.phonon.tts.VoicePackStoreTest --console=plain
 python3 - "$APP_DIR" "$ARTIFACT_DIR" <<'PY'
 import json, hashlib, pathlib, shutil, struct, sys, zipfile
 app, destination = map(pathlib.Path, sys.argv[1:])
@@ -34,7 +34,7 @@ with zipfile.ZipFile(apk) as archive:
     assert archive.getinfo('assets/licenses/German-Voices-NOTICE.txt').file_size > 100
     for name in ['LICENSE-MIT' ,'LICENSE-APACHE','Sonic-LICENSE.txt','NOTICE.txt']:
         assert archive.getinfo(f'assets/licenses/{name}').file_size > 100
-out = destination / 'Phonon-TTS-v0.4.1-android.10.apk'
+out = destination / 'Phonon-TTS-v0.4.1-android.11.apk'
 shutil.copy2(apk,out)
 sha = hashlib.sha256(out.read_bytes()).hexdigest()
 checksum = out.with_name(out.name + '.sha256')
@@ -45,8 +45,8 @@ print(checksum.read_text(),end='')
 PY
 
 # Validate in-place preview compatibility when the previous release is available locally.
-if test -f "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.9.apk"; then
-    python3 "$APP_DIR/verify-update.py" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.10.apk" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.9.apk"
+if test -f "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.10.apk"; then
+    python3 "$APP_DIR/verify-update.py" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.11.apk" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.10.apk"
 fi
 
-"${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/opt/data/android/sdk}}/build-tools/36.0.0/zipalign" -c -P 16 4 "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.10.apk"
+"${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/opt/data/android/sdk}}/build-tools/36.0.0/zipalign" -c -P 16 4 "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.11.apk"

@@ -16,7 +16,7 @@ for lang in locales:
     assert len(strings) == len(elements), f'Duplicate key in {lang}'
     sets[lang] = strings
 base = sets['en']
-assert len(base) == 68 and 'prefer_language' not in base
+assert len(base) == 74 and 'prefer_language' not in base
 pattern = r'%(?:\d+\$)?[\d.]*[a-zA-Z%]'
 for lang, strings in sets.items():
     assert strings.keys() == base.keys(), f'Key mismatch: {lang}'

@@ -27,8 +27,8 @@ android {
         targetSdk = 36
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
         resourceConfigurations += listOf("en", "de", "fr", "es", "pt")
-        versionCode = 11
-        versionName = "0.4.1-android.10"
+        versionCode = 12
+        versionName = "0.4.1-android.11"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     // What android/build.sh writes.

@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 internal data class InstalledChoice(val id: String, val label: String, val details: String)
 internal data class SettingsUiState(
     val installed: List<InstalledChoice> = emptyList(), val selectedInstalled: String? = null, val installedCatalog: Set<String> = emptySet(),
-    val ready: Boolean = false, val busy: Boolean = false, val loading: Boolean = false,
+    val deleting: Boolean = false, val ready: Boolean = false, val busy: Boolean = false, val loading: Boolean = false,
     val error: Boolean = false, val status: String = "", val installedDetails: String = "",
     val operation: String = "", val selectedModel: Int = 0,
     val packLabel: String = "", val packReady: Boolean = false,
@@ -38,6 +38,7 @@ internal data class SettingsUiState(
     val confirmReplacement: Boolean = false, val licenseText: String? = null
 )
 internal data class SettingsActions(
+    val deleteInstalled: (String) -> Unit,
     val downloadPack: () -> Unit,
     val selectInstalled: (String) -> Unit,
     val selectModel: (Int) -> Unit, val selectVoice: (Int) -> Unit,
@@ -77,6 +78,7 @@ internal fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
         if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
     } else if (dark) SageDark else SageLight
     MaterialTheme(colorScheme = colors, typography = Typography(), shapes = Shapes()) {
+        var deleteId by rememberSaveable { mutableStateOf<String?>(null) }
         var modelsOpen by rememberSaveable { mutableStateOf(false) }
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
@@ -109,12 +111,23 @@ internal fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
                                 state.installed.forEach { entry ->
                                     val selected = entry.id == state.selectedInstalled
                                     ModelChoiceRow(entry.label, entry.details, selected, !state.busy,
-                                        onClick = { actions.selectInstalled(entry.id) })
+                                        onClick = { actions.selectInstalled(entry.id) },
+                                        trailingAction = {
+                                            val label = stringResource(R.string.delete_model_label, entry.label)
+                                            IconButton(onClick = { deleteId = entry.id }, enabled = !state.busy,
+                                                modifier = Modifier.semantics { contentDescription = label }) {
+                                                Canvas(Modifier.size(20.dp)) {
+                                                    val ink = colors.onSurfaceVariant
+                                                    drawLine(ink, Offset(size.width * .2f, size.height * .25f), Offset(size.width * .8f, size.height * .25f), 2.dp.toPx())
+                                                    drawRect(ink, Offset(size.width * .3f, size.height * .35f), androidx.compose.ui.geometry.Size(size.width * .4f, size.height * .55f))
+                                                }
+                                            }
+                                        })
                                 }
                             }
                             if (state.busy || state.loading) LinearProgressIndicator(Modifier.fillMaxWidth())
                             if (state.operation.isNotBlank()) Text(state.operation, Modifier.semantics { liveRegion = LiveRegionMode.Polite }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            if (state.busy) OutlinedButton(onClick = actions.cancelInstall) { Text(stringResource(R.string.cancel)) }
+                            if (state.busy && !state.deleting) OutlinedButton(onClick = actions.cancelInstall) { Text(stringResource(R.string.cancel)) }
                         }
                     }
                     if (state.ready) {
@@ -186,6 +199,15 @@ internal fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
                 Button(onClick = { modelsOpen = false; actions.download() }, enabled = !state.busy && (!model.gated || state.token.isBlank()), modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) { Text(stringResource(R.string.download)) }
             }
         }
+        state.installed.firstOrNull { it.id == deleteId }?.let { entry ->
+            AlertDialog(onDismissRequest = { deleteId = null },
+                title = { Text(stringResource(R.string.delete_model_label, entry.label)) },
+                text = { Text(stringResource(R.string.delete_model_message, entry.label)) },
+                confirmButton = { TextButton(enabled = !state.busy, onClick = {
+                    deleteId = null; actions.deleteInstalled(entry.id)
+                }) { Text(stringResource(R.string.delete_model_confirm)) } },
+                dismissButton = { TextButton(onClick = { deleteId = null }) { Text(stringResource(android.R.string.cancel)) } })
+        }
         if (state.confirmReplacement) AlertDialog(onDismissRequest = actions.dismissReplacement,
             title = { Text(stringResource(R.string.replace_title)) }, text = { Text(stringResource(R.string.replace_message)) },
             confirmButton = { TextButton(onClick = actions.confirmReplacement) { Text(stringResource(R.string.replace_confirm)) } },
@@ -221,10 +243,11 @@ internal fun SettingsScreen(state: SettingsUiState, actions: SettingsActions) {
 /** The radio is centered against the complete text block in both model pickers. */
 @Composable
 private fun ModelChoiceRow(title: String, details: String, selected: Boolean, enabled: Boolean,
-    onClick: () -> Unit, annotations: List<String> = emptyList()) {
+    onClick: () -> Unit, annotations: List<String> = emptyList(), trailingAction: (@Composable () -> Unit)? = null) {
     OutlinedCard(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.outlinedCardColors(containerColor = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface)) {
-        Row(Modifier.fillMaxWidth().heightIn(min = 48.dp)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.weight(1f).heightIn(min = 48.dp)
             .selectable(selected = selected, enabled = enabled, role = Role.RadioButton, onClick = onClick)
             .padding(12.dp), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -235,6 +258,8 @@ private fun ModelChoiceRow(title: String, details: String, selected: Boolean, en
                 Text(details, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 annotations.forEach { Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             }
+        }
+        trailingAction?.invoke()
         }
     }
 }

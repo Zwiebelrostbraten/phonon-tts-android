@@ -16,10 +16,34 @@ class Inventory(private val root: File) {
         }
         return ids.mapNotNull { id ->
             val dir = target(id)
+            if (File(dir.parentFile, dir.name + ".deleted").exists()) return@mapNotNull null
             CheckpointSwap.recover(dir)
             if (complete(dir)) id to dir else null
         }.toMap()
     }
+    /** Identity only; never accepts a UI path. Marker survives failures and prevents recovery. */
+    fun remove(id: String) {
+        val dir = target(id)
+        require(live(id, dir)) { "Model is no longer installed" }
+        val anchor = root.canonicalFile
+        for (suffix in listOf("", ".backup", ".staging")) {
+            val source = File(dir.parentFile, dir.name + suffix)
+            val expected = File(anchor, source.relativeTo(root).path)
+            require(source.canonicalFile == expected) { "Unsafe model path" }
+            require(source.walkTopDown().all { it.canonicalFile == File(expected, it.relativeTo(source).path) }) { "Unsafe model contents" }
+        }
+        val marker = File(dir.parentFile, dir.name + ".deleted")
+        check(marker.mkdir()) { "Cannot mark model for deletion" }
+        // Mark first: a crash at any later point must never resurrect a backup.
+        for (suffix in listOf(".backup", ".staging", "")) {
+            val source = File(dir.parentFile, dir.name + suffix)
+            if (source.exists()) check(source.renameTo(File(marker, "checkpoint" + suffix))) { "Cannot quarantine model" }
+        }
+        check(marker.deleteRecursively()) { "Model removed from inventory, but storage cleanup failed" }
+    }
+    fun live(id: String, directory: File): Boolean =
+        target(id) == directory && !File(directory.parentFile, directory.name + ".deleted").exists() && complete(directory)
+
     fun <T> commit(id: String, staging: File, cancelled: () -> Boolean, activate: () -> T): T {
         if(cancelled()) throw java.util.concurrent.CancellationException()
         return CheckpointSwap.replace(staging,target(id)) {

@@ -30,7 +30,7 @@
   <string name="preview">Écouter l’aperçu</string>
   <string name="stop_preview">Arrêter l’aperçu</string>
   <string name="licenses">Licences hors ligne</string>
-  <string name="about_fork">0.4.1-android.10 · Version communautaire · Synthèse hors ligne</string>
+  <string name="about_fork">0.4.1-android.11 · Version communautaire · Synthèse hors ligne</string>
   <string name="installed_model">Modèles installés</string>
   <string name="installed_details">%1$s · %2$.1f MB sur l’appareil</string>
   <string name="model_actions">Catalogue · 7 modèles</string>
@@ -68,4 +68,10 @@
   <string name="default_voice">Par défaut</string>
     <string name="download_voice_pack">Télécharger les voix en %1$s · %2$d voix · %3$.1f Mo</string>
     <string name="voice_pack_available">Voix disponibles pour cette langue</string>
+    <string name="delete_model_label">Supprimer le modèle « %1$s »</string>
+    <string name="delete_model_message">Supprimer l’installation de « %1$s » de cet appareil ? Seule cette installation sera supprimée. Les packs de voix partagés seront conservés.</string>
+    <string name="delete_model_confirm">Supprimer</string>
+    <string name="deleting_model">Suppression du modèle…</string>
+    <string name="delete_model_complete">Modèle supprimé.</string>
+    <string name="delete_model_failed">Échec de la suppression du modèle. Le nettoyage peut ne pas avoir entièrement libéré l’espace de stockage. Vérifiez le stockage et réessayez.</string>
 </resources>

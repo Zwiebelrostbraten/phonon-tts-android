@@ -1,3 +1,7 @@
+## 0.4.1-android.11 (versionCode 12)
+
+Each installed model has a separate delete action with a named confirmation in all five UI languages. Deletion runs in the foreground service under installation and native lifecycle locks. It removes only that installation and its transaction artifacts, preserves shared voice packs and tokens, clears defaults referencing the removed identity, and routes the remaining selection deterministically. A persistent quarantine marker prevents interrupted deletion from restoring backups. Stale entries are rejected before native activation.
+
 # 0.4.1-android.9 (versionCode 10)
 
 Installed model rows now use consistent full widths, title-aligned radio indicators, explicit spacing and a single accessible selection target. Selecting a model automatically saves it as the default for all its supported languages; unrelated defaults remain unchanged. The obsolete preview default button is removed in all five locales (66 string keys). No runtime, voice assets, storage paths, permissions or TokenStore changes.

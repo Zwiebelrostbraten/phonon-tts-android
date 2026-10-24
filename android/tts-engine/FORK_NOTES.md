@@ -1,5 +1,7 @@
-# Current update: 0.4.1-android.10 (versionCode 11)
+# Current update: 0.4.1-android.11 (versionCode 12)
 
+
+Installed models can be removed using the separate delete icon, including the active model and legacy imports. Confirm the named installation to delete it; cancel leaves storage and selection unchanged. Shared voice packs, tokens and other checkpoints remain. Failed cleanup reports an operation failure; its deletion marker prevents backup recovery and retained files can be cleaned by reinstalling the same identity.
 See README.md for the shared on-demand voice pack contract and UPDATE10_VALIDATION.md for current build evidence. The records below are historical; references to bundled embeddings describe older APKs. The current APK has metadata for 102 voices and no embedding binaries.
 
 # Android fork implementation notes

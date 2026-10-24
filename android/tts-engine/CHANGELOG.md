@@ -1,3 +1,7 @@
+## 0.4.1-android.11 (versionCode 12)
+
+Each installed model has a separate delete action with a named confirmation in all five UI languages. Deletion runs in the foreground service under installation and native lifecycle locks. It removes only that installation and its transaction artifacts, preserves shared voice packs and tokens, clears defaults referencing the removed identity, and routes the remaining selection deterministically. A persistent quarantine marker prevents interrupted deletion from restoring backups. Stale entries are rejected before native activation.
+
 ## 0.4.1-android.10 (versionCode 11)
 
 - Shared, user-triggered public voice packs per language: 102 metadata entries; no embedding binaries in the APK. Pinned sizes and SHA-256, token-free download, cancellation, staging and rollback.

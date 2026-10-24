@@ -30,7 +30,7 @@
   <string name="preview">Escuchar muestra</string>
   <string name="stop_preview">Detener muestra</string>
   <string name="licenses">Licencias sin conexión</string>
-  <string name="about_fork">0.4.1-android.10 · Versión comunitaria · Voz sin conexión</string>
+  <string name="about_fork">0.4.1-android.11 · Versión comunitaria · Voz sin conexión</string>
   <string name="installed_model">Modelos instalados</string>
   <string name="installed_details">%1$s · %2$.1f MB en el dispositivo</string>
   <string name="model_actions">Catálogo · 7 modelos</string>
@@ -68,4 +68,10 @@
   <string name="default_voice">Predeterminada</string>
     <string name="download_voice_pack">Descargar voces en %1$s · %2$d voces · %3$.1f MB</string>
     <string name="voice_pack_available">Voces disponibles para este idioma</string>
+    <string name="delete_model_label">Eliminar modelo «%1$s»</string>
+    <string name="delete_model_message">¿Eliminar la instalación de «%1$s» de este dispositivo? Solo se elimina esta instalación. Se conservan los paquetes de voces compartidos.</string>
+    <string name="delete_model_confirm">Eliminar</string>
+    <string name="deleting_model">Eliminando modelo…</string>
+    <string name="delete_model_complete">Modelo eliminado.</string>
+    <string name="delete_model_failed">Error al eliminar el modelo. Es posible que la limpieza no haya liberado todo el espacio de almacenamiento. Revisa el almacenamiento e inténtalo de nuevo.</string>
 </resources>
