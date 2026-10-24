@@ -1,0 +1,21 @@
+name: Android feature request
+description: Suggest an improvement to the Android app.
+title: "[Android feature] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the Android app or reader workflow without private text or account data.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Suggested behavior and alternatives
+    validations:
+      required: true
+  - type: input
+    id: context
+    attributes:
+      label: Relevant device, Android version, reader, model or language

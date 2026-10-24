@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Installation and troubleshooting
+    url: https://github.com/Zwiebelrostbraten/phonon-tts-android/blob/main/README.md
+    about: Read the Android app guide before opening a report.
+  - name: Security reporting
+    url: https://github.com/Zwiebelrostbraten/phonon-tts-android/blob/main/SECURITY.md
+    about: Read how to arrange private reporting; do not post vulnerability details publicly.

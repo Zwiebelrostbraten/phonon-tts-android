@@ -78,9 +78,9 @@ downloads the files the library needs from the default model's repo:
 hf download gradium/phonon-31m-en config.json tokenizer.json model.q8.gguf default-voice.safetensors --local-dir phonon-31m-en
 ```
 
-The [README](../README.md#model-setup) lists the other models. The Phonon 40m models are gated:
+The [upstream runtime README](../README.upstream.md#model-setup) lists the other models. The Phonon 40m models are gated:
 accept the terms on the model's Hugging Face page before you download them. To add a voice, put
-its file in `voices/`. It can come from the [voice catalog](../README.md#voices) or from Gradium
+its file in `voices/`. It can come from the [voice catalog](../README.upstream.md#voices) or from Gradium
 Studio.
 
 **macOS and iOS** load a Core ML bundle. Each

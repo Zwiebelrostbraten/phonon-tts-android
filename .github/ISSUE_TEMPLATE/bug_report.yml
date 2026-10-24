@@ -1,0 +1,46 @@
+name: Android bug report
+description: Report a reproducible problem with the Phonon TTS Android app.
+title: "[Android bug] "
+body:
+  - type: markdown
+    attributes:
+      value: "Use harmless sample text. Remove tokens, credentials, account details and private text from logs or screenshots. For vulnerabilities, read SECURITY.md first."
+  - type: input
+    id: app_version
+    attributes:
+      label: App version and installation source
+      placeholder: "0.4.1-android.11, GitHub preview APK"
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device, CPU / architecture and Android version
+      description: Include the phone model and chipset if known; write unknown rather than guessing.
+    validations:
+      required: true
+  - type: input
+    id: model_voice
+    attributes:
+      label: Model, spoken language and voice
+      description: Include whether the optional language voice pack is installed.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Include reader app/version if relevant. For performance issues, provide only harmless sample text and describe how you measured.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Optional redacted logs or screenshots
+      description: Share images only if you are comfortable publishing them. Check for secrets and private content first.
