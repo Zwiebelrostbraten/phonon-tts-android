@@ -3,7 +3,8 @@
 set -eu
 APP_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 REPO_DIR=$(CDPATH= cd -- "$APP_DIR/../.." && pwd)
-ARTIFACT_DIR=$(dirname -- "$REPO_DIR")
+ARTIFACT_DIR=${ARTIFACT_DIR:-"$APP_DIR/build/outputs/community"}
+mkdir -p "$ARTIFACT_DIR"
 for abi in arm64-v8a x86_64; do
     test -s "$REPO_DIR/android/jniLibs/$abi/libptts_ffi.so" || {
         echo "Missing real native CPU library for $abi; finish android/build.sh first." >&2
@@ -15,7 +16,7 @@ python3 "$APP_DIR/validate-resources.py"
 python3 - "$APP_DIR" "$ARTIFACT_DIR" <<'PY'
 import json, hashlib, pathlib, shutil, struct, sys, zipfile
 app, destination = map(pathlib.Path, sys.argv[1:])
-apk = app / 'build/outputs/apk/release/phonon-tts-engine-release.apk'
+apk = app / 'build/outputs/apk/release/phonon-tts-engine-release-unsigned.apk'
 with zipfile.ZipFile(apk) as archive:
     for abi, machine in [('arm64-v8a',183),('x86_64',62)]:
         name = f'lib/{abi}/libptts_ffi.so'
@@ -34,7 +35,7 @@ with zipfile.ZipFile(apk) as archive:
     assert archive.getinfo('assets/licenses/German-Voices-NOTICE.txt').file_size > 100
     for name in ['LICENSE-MIT' ,'LICENSE-APACHE','Sonic-LICENSE.txt','NOTICE.txt']:
         assert archive.getinfo(f'assets/licenses/{name}').file_size > 100
-out = destination / 'Phonon-TTS-v1.0.0.apk'
+out = destination / 'Phonon-TTS-Community-v1.1.0-unsigned.apk'
 shutil.copy2(apk,out)
 sha = hashlib.sha256(out.read_bytes()).hexdigest()
 checksum = out.with_name(out.name + '.sha256')
@@ -44,9 +45,6 @@ print(out)
 print(checksum.read_text(),end='')
 PY
 
-# Validate in-place update compatibility when the previous release is available locally.
-if test -f "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.11.apk"; then
-    python3 "$APP_DIR/verify-update.py" "$ARTIFACT_DIR/Phonon-TTS-v1.0.0.apk" "$ARTIFACT_DIR/Phonon-TTS-v0.4.1-android.11.apk"
-fi
+"${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/opt/data/android/sdk}}/build-tools/36.0.0/zipalign" -c -P 16 4 "$ARTIFACT_DIR/Phonon-TTS-Community-v1.1.0-unsigned.apk"
 
-"${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/opt/data/android/sdk}}/build-tools/36.0.0/zipalign" -c -P 16 4 "$ARTIFACT_DIR/Phonon-TTS-v1.0.0.apk"
+python3 "$APP_DIR/verify-apk.py" "$ARTIFACT_DIR/Phonon-TTS-Community-v1.1.0-unsigned.apk"

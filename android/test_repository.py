@@ -7,6 +7,39 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 
 class RepositoryContract(unittest.TestCase):
+    def test_community_identity_and_unsigned_release(self):
+        import xml.etree.ElementTree as ET
+        gradle = (ROOT / "android/tts-engine/build.gradle.kts").read_text()
+        self.assertIn('applicationId = "io.github.zwiebelrostbraten.phonontts"', gradle)
+        self.assertIn('versionCode = 14', gradle)
+        self.assertIn('versionName = "1.1.0"', gradle)
+        self.assertNotIn('signingConfig =', gradle)
+        for path in (ROOT / "android/tts-engine/src/main/res").glob("values*/strings.xml"):
+            values = {e.attrib['name']: e.text for e in ET.parse(path).getroot()}
+            self.assertEqual(values['app_name'], 'Phonon TTS Community')
+        manifest = ET.parse(ROOT / "android/tts-engine/src/main/AndroidManifest.xml")
+        ns = '{http://schemas.android.com/apk/res/android}'
+        for element in manifest.iter():
+            name = element.get(ns + 'name', '')
+            self.assertFalse(name.startswith('.'), name)
+
+    def test_native_build_is_pinned_and_frozen(self):
+        toolchain = tomllib.loads((ROOT / "rust-toolchain.toml").read_text())['toolchain']
+        self.assertEqual(toolchain['channel'], '1.99.1')
+        self.assertEqual(set(toolchain['targets']), {'aarch64-linux-android', 'x86_64-linux-android'})
+        script = (ROOT / 'android/build.sh').read_text()
+        for requirement in ['--frozen', '--locked', '4.1.2', '27.2.12479018', '--offline', '--remap-path-prefix']:
+            self.assertIn(requirement, script)
+        self.assertNotIn('rustup target add', script)
+
+    def test_packaging_has_no_historical_signer_dependency(self):
+        package = (ROOT / 'android/tts-engine/package-preview.sh').read_text()
+        self.assertIn('release-unsigned.apk', package)
+        self.assertNotIn('v0.4.1-android.11', package)
+        verifier = (ROOT / 'android/tts-engine/verify-update.py').read_text()
+        self.assertNotIn('63e64d670aced1303', verifier)
+        self.assertNotIn("'ai.gradium.phonon.tts'", verifier)
+
     def test_workspace_and_path_closure(self):
         root = tomllib.loads((ROOT / "Cargo.toml").read_text())
         self.assertEqual(set(root["workspace"]["members"]), {"ptts", "ptts-ffi"})

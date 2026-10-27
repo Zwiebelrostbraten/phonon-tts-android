@@ -1,7 +1,7 @@
 <p align="center">
-  <img src="docs/readme/app-icon.svg" width="96" height="96" alt="Phonon TTS app icon">
+  <img src="docs/readme/app-icon.svg" width="96" height="96" alt="Phonon TTS Community app icon">
 </p>
-<h1 align="center">Phonon TTS</h1>
+<h1 align="center">Phonon TTS Community</h1>
 <p align="center">Offline text-to-speech for Android.</p>
 
 <p align="center">
@@ -14,10 +14,13 @@
   <a href="https://github.com/Zwiebelrostbraten/phonon-tts-android/releases/latest"><strong>Download APK</strong></a> ·
   <a href="#getting-started">Getting started</a> ·
   <a href="docs/user-guide.md">User guide</a> ·
-  <a href="docs/android-development.md">Development</a>
+  <a href="docs/android-development.md">Development</a> ·
+  <a href="docs/f-droid.md">F-Droid submission preparation</a>
 </p>
 
-Phonon TTS brings [Gradium Phonon](https://github.com/gradium-ai/xn-ptts) to Android as a system text-to-speech engine. Use it with reading and accessibility apps that support Android’s TextToSpeech service. After downloading a model and any optional voices, speech is generated entirely on your device, without an internet connection.
+Phonon TTS Community brings [Gradium Phonon](https://github.com/gradium-ai/xn-ptts) to Android as a system text-to-speech engine. Use it with reading and accessibility apps that support Android’s TextToSpeech service. After downloading a model and any optional voices, speech is generated entirely on your device, without an internet connection.
+
+**Distribution status:** The download link currently provides the earlier **Phonon TTS** release. The **1.1.0 source** prepares Phonon TTS Community with a new application ID (`io.github.zwiebelrostbraten.phonontts`), distinct artwork and no migration of earlier app data. Its release builds are unsigned for distributors to sign. It is not yet listed on F-Droid; see [distribution and signing](docs/f-droid.md).
 
 ## Features
 
@@ -32,9 +35,9 @@ Phonon TTS brings [Gradium Phonon](https://github.com/gradium-ai/xn-ptts) to And
 **Requirements:** Android 7+ (API 24), with ARM64 supporting **ARMv8.2 dotprod and FP16**, or x86_64. Not all 64-bit phones are compatible. This app uses CPU inference.
 
 1. [Download the latest APK](https://github.com/Zwiebelrostbraten/phonon-tts-android/releases/latest) and install it on your device.
-2. Open Phonon TTS and download a model. Start with **phonon-31m-en** for free English speech without an account.
+2. Open the app and download a model. Start with **phonon-31m-en** for free English speech without an account.
 3. Select your model, language and voice, then listen to the sample. Download additional voices if desired.
-4. In Android’s **Text-to-speech output** settings, select **Phonon TTS** as your preferred engine.
+4. In Android’s **Text-to-speech output** settings, select this app as your preferred engine.
 
 The initial model download is required (approximately 65–75 MB). The English 31M model uses Apache-2.0; the six 40M models require Hugging Face approval and a read token and are licensed **CC-BY-NC-4.0 for noncommercial use**. See [model access and setup](docs/user-guide.md#models) before downloading them.
 

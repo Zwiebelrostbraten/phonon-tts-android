@@ -1,5 +1,5 @@
 name: Android bug report
-description: Report a reproducible problem with the Phonon TTS Android app.
+description: Report a reproducible problem with the Phonon TTS Community Android app.
 title: "[Android bug] "
 body:
   - type: markdown

@@ -21,14 +21,15 @@ androidComponents.onVariants { it.sources.java?.addGeneratedSourceDirectory(shar
 android {
     namespace = "ai.gradium.phonon.tts"
     compileSdk = 37
+    ndkVersion = "27.2.12479018"
     defaultConfig {
-        applicationId = "ai.gradium.phonon.tts"
+        applicationId = "io.github.zwiebelrostbraten.phonontts"
         minSdk = 24
         targetSdk = 36
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
         resourceConfigurations += listOf("en", "de", "fr", "es", "pt")
-        versionCode = 13
-        versionName = "1.0.0"
+        versionCode = 14
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     // What android/build.sh writes.
@@ -36,8 +37,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
-            // Preserve the established local signer for in-place updates; never commit its key.
-            signingConfig = signingConfigs.getByName("debug")
+            // Deliberately unsigned. Distribution repositories sign their own APKs.
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

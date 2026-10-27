@@ -1,4 +1,4 @@
-Phonon TTS Android community fork
+Phonon TTS Community Android fork
 https://github.com/Zwiebelrostbraten/phonon-tts-android
 Based on https://github.com/gradium-ai/xn-ptts (MIT OR Apache-2.0).
 Not an official Gradium release.
@@ -17,3 +17,5 @@ German: gradium/phonon-40m-de, CC-BY-NC-4.0.
 Multilingual: gradium/phonon-40m-multilingual, CC-BY-NC-4.0.
 Model attribution: Gradium, https://huggingface.co/gradium
 Gated models require the user's own approval and read token.
+
+Community speech-bubble/equalizer artwork in Android resources and docs/readme/app-icon.svg: copyright 2026 Phonon TTS Community contributors, MIT OR Apache-2.0.

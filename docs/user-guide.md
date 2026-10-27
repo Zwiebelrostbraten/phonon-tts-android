@@ -1,23 +1,25 @@
-# Phonon TTS user guide
+# Phonon TTS Community user guide
 
 [App overview and download](../README.md) · [Android development](android-development.md)
 
-Phonon TTS is a community-maintained Android system text-to-speech engine based on Gradium Phonon. This guide covers installation, model access, voices and everyday use.
+Phonon TTS Community is a community-maintained Android system text-to-speech engine based on Gradium Phonon. This guide covers installation, model access, voices and everyday use.
 
 ## Install and set up
 
 Requires **Android 7+ (API 24)** and ARM64 with **ARMv8.2 dotprod and FP16**, or x86_64. A 64-bit phone alone does not establish compatibility. Speech synthesis runs on the CPU.
 
 1. Download the APK from the [latest stable release](https://github.com/Zwiebelrostbraten/phonon-tts-android/releases/latest) and open it. If prompted, allow installation from the browser or file manager you used.
-2. Open Phonon TTS and download a model. **phonon-31m-en** provides English without an account; the 40M models require Hugging Face approval and a saved read token (see [Models](#models)). No model weights are bundled in the APK.
+2. Open the app and download a model. **phonon-31m-en** provides English without an account; the 40M models require Hugging Face approval and a saved read token (see [Models](#models)). No model weights are bundled in the APK.
 3. Select an installed model, spoken language and voice, then play the sample. Additional voice packs are optional downloads.
-4. In Android settings, search for **Text-to-speech output**, choose **Phonon TTS** as the preferred engine and play the system sample. Setting names vary by device. Your reader must support Android system TTS.
+4. In Android settings, search for **Text-to-speech output**, choose the app as the preferred engine and play the system sample. Setting names vary by device. Your reader must support Android system TTS.
+
+**Which release you get:** the download link currently provides the earlier **Phonon TTS** release under `ai.gradium.phonon.tts`, whose engine is labelled **Phonon TTS** in Android settings. The 1.1.0 **Phonon TTS Community** source has its own application ID and is not distributed as an APK yet; see [distribution status](../README.md) and [submission and signing notes](f-droid.md).
 
 ## Updates and installation warnings
 
 Install an update over the existing app to retain models, voices, preferences and the saved token. Do not uninstall or clear app data to resolve an update problem without first considering the data loss.
 
-Stable 1.0.0 retains the previews’ established **Android Debug signing certificate** for update compatibility. Its release build is minified and nondebuggable. A build made elsewhere may use a different signing key and cannot update the published installation in place. If installation fails, verify the download source and signing compatibility while preserving existing app data.
+Version 1.1.0 uses the separate application ID `io.github.zwiebelrostbraten.phonontts` and does not migrate older app data. Source release APKs are unsigned and cannot be installed until a distributor signs them. F-Droid would sign its own builds if accepted. Use signed APKs from a trusted distributor; later updates for this identity need that distributor’s matching signature. Historical 1.0.0 releases used a debug certificate. See [submission and signing notes](f-droid.md).
 
 Permission to install from a browser or file manager differs from a harmful-app warning. If Android displays a security warning, stop and verify the download and release information; do not disable Play Protect.
 

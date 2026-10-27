@@ -1,0 +1,1 @@
+New community identity: Phonon TTS Community, with a distinct app ID and original icon. Source-native builds use pinned Rust/NDK tools; release APKs are unsigned for distributor signing. Adds store metadata and model-license disclosures. Retains seven models, five UI languages and 102 downloadable public voices. Existing installation data is not migrated.

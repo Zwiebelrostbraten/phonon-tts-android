@@ -6,7 +6,7 @@ The [user guide](user-guide.md) covers installation and use. This guide covers t
 
 The checked-in configuration uses **JDK 17**, **Gradle 9.3.1** (wrapper), **Android Gradle Plugin 9.1.1**, Kotlin/Compose plugin **2.2.20**, compile SDK **37**, target SDK **36** and minimum API **24**. Packaging calls SDK build-tools **36.0.0** for zipalign. Set `ANDROID_HOME` to your SDK directory and install those SDK components. No CI run is required; packaging is manual.
 
-Native builds need Rust, cargo-ndk and an Android NDK. `android/build.sh` uses the NDK found through `ANDROID_NDK_HOME`/cargo-ndk; it does not pin an NDK version. The local SDK currently provides NDK **27.2.12479018**. The script explicitly sets 16 KiB ELF page alignment and ARM64 dotprod/FP16 features. The published CPU build therefore requires ARMv8.2 features. x86_64 is packaged too; this is not evidence of an emulator test.
+Native builds require **Rust/Cargo 1.99.1**, **cargo-ndk 4.1.2** and **NDK 27.2.12479018**. The script verifies these exact versions, targets API 24, and sets 16 KiB ELF alignment, ARM64 dotprod/FP16 and x86-64 baseline SSE2. The default ARM64 build requires those CPU features. See [F-Droid preparation](f-droid.md) for provisioning, frozen source builds and metadata handoff.
 
 ## Build and package
 
@@ -18,16 +18,18 @@ export ANDROID_HOME=/path/to/android-sdk
 export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018"
 export TMPDIR=/path/to/scratch
 mkdir -p "$TMPDIR"
-cargo install cargo-ndk
-./android/build.sh
+rustup toolchain install 1.99.1 --profile minimal --target aarch64-linux-android,x86_64-linux-android
+cargo install cargo-ndk@4.1.2 --locked
+cargo fetch --locked --target aarch64-linux-android --target x86_64-linux-android
+./android/build.sh --offline
 ./android/tts-engine/package-preview.sh
 ```
 
 `android/build.sh` rebuilds `ptts-ffi` for arm64-v8a and x86_64 and replaces `android/jniLibs/`. These generated libraries are not tracked in Git; a fresh checkout needs real native builds, not placeholder libraries. Existing validated libraries can be reused for app-only work.
 
-`package-preview.sh` validates resources, builds the minified release, runs selected JVM tests, checks packaged native architectures/JNA, voice metadata and notices, and checks APK alignment. Its current outputs are **`Phonon-TTS-v1.0.0.apk` and its `.sha256` sidecar in the repository’s parent directory**. The script contains explicit versioned output names; changing documentation does not change the app version. The historical manual script name is retained for stable releases. When the .11 APK exists there, it also verifies update compatibility. Nothing is uploaded by the script.
+`package-preview.sh` validates resources, builds an optimized **unsigned** release, runs the JVM tests and checks native architectures, notices, voice metadata, absence of weights, ELF and ZIP alignment. It writes `Phonon-TTS-Community-v1.1.0-unsigned.apk` and a SHA-256 sidecar under `android/tts-engine/build/outputs/community/` (override with `ARTIFACT_DIR`). Nothing is uploaded. `verify-apk.py` checks the current unsigned release independently; `verify-update.py` is only an optional comparison of two distributor-signed APKs, with no fixed historical signer.
 
-The release build currently uses Gradle’s **debug signing configuration**. Stable 1.0.0 retains the established local Android Debug certificate used by previews, by user choice. A minified, nondebuggable release build and a stable GitHub tag do not change the signer certificate name. The private key and its local backups must never enter Git. A build elsewhere normally receives a different certificate and cannot update an installed published preview in place. Preserve the original installation and data when investigating signature mismatches. Do not commit or distribute private signing keys, credentials or local SDK configuration.
+Release builds have no signing configuration. F-Droid signs its own compiled APK if accepted; the local unsigned APK is not installable until signed. No signing secrets are needed for building or checking it. Historical artifacts and certificates are unchanged; this new application identity deliberately has no migration or update compatibility layer.
 
 R8 rules in [proguard-rules.pro](../android/tts-engine/proguard-rules.pro) preserve JNA reflection. Do not remove them when changing packaging.
 
@@ -63,7 +65,7 @@ This makes public network requests; no gated-model token is needed. See the hist
 
 Use harmless sample text and record the device, CPU, Android version, app version, model and voice. Check:
 
-- Update over the preceding preview with the same certificate; confirm retained models, saved token and voice preferences.
+- Install a distributor-signed build under the new application identity; verify the settings entry opens this app. No old data migration is expected.
 - Download the public English model, select the system TTS engine and play app/system samples offline after installation.
 - Download an optional voice pack, change language/model and confirm routing. Selecting multilingual should update all five defaults.
 - Test cancellation, model switch during speech, deletion confirmation/cancellation and remaining model/voice availability. Native handle lifecycle and deletion UI need device confirmation.
@@ -72,7 +74,7 @@ Use harmless sample text and record the device, CPU, Android version, app versio
 
 ## Repository scope
 
-The Cargo workspace contains only `ptts` (shared inference core and regression fixtures) and `ptts-ffi` (CPU C/JNA interface). Native version remains 0.4.1; the app remains 1.0.0, code 13. Shared generic engine code and optional library features remain to avoid changing inference behavior; Android enables only tokenization (`hf`) and the CPU backend. Other platform frontends, desktop commands and upstream automation live in Git history and the [upstream project](https://github.com/gradium-ai/xn-ptts).
+The Cargo workspace contains only `ptts` (shared inference core and regression fixtures) and `ptts-ffi` (CPU C/JNA interface). Native version remains 0.4.1; the app is 1.1.0, code 14. Shared generic engine code and optional library features remain to avoid changing inference behavior; Android enables only tokenization (`hf`) and the CPU backend. Other platform frontends, desktop commands and upstream automation live in Git history and the [upstream project](https://github.com/gradium-ai/xn-ptts).
 
 ## Source map
 

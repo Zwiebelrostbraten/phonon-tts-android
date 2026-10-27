@@ -1,0 +1,74 @@
+AntiFeatures:
+  NonFreeAssets:
+    en-US: Six optional 40M speech checkpoints use CC-BY-NC-4.0 and require Hugging
+      Face approval. No models are bundled. The English 31M checkpoint and public
+      voices use Apache-2.0.
+Categories:
+  - System
+  - Text to Speech
+License: MIT
+AuthorName: Phonon TTS Community contributors
+WebSite: https://github.com/Zwiebelrostbraten/phonon-tts-android
+SourceCode: https://github.com/Zwiebelrostbraten/phonon-tts-android
+IssueTracker: https://github.com/Zwiebelrostbraten/phonon-tts-android/issues
+Changelog: https://github.com/Zwiebelrostbraten/phonon-tts-android/releases
+
+AutoName: Phonon TTS Community
+
+RepoType: git
+Repo: https://github.com/Zwiebelrostbraten/phonon-tts-android.git
+
+Builds:
+  - versionName: 1.1.0
+    versionCode: 14
+    commit: v1.1.0
+    subdir: android/tts-engine
+    output: build/outputs/apk/release/phonon-tts-engine-release-unsigned.apk
+    srclibs:
+      - rustup@1.28.2
+    build:
+      - export CARGO_HOME=$HOME/.cargo RUSTUP_HOME=$HOME/.rustup
+      - export RUSTUP_VERSION=1.28.2
+      - $$rustup$$/rustup-init.sh -y --profile minimal --default-toolchain 1.99.1
+        --target aarch64-linux-android,x86_64-linux-android
+      - export PATH=$CARGO_HOME/bin:$PATH
+      - cargo install cargo-ndk@4.1.2 --locked
+      - export ANDROID_NDK_HOME=$$NDK$$ CARGO_BUILD_JOBS=2
+      - sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0'
+      - export PHONON_TOOLS=$HOME/.cache/phonon-build-tools
+      - mkdir -p $PHONON_TOOLS
+      - curl --fail --location --output $PHONON_TOOLS/gradle.zip https://services.gradle.org/distributions/gradle-9.3.1-bin.zip
+      - echo 'b266d5ff6b90eada6dc3b20cb090e3731302e553a27c5d3e4df1f0d76beaff06  '$PHONON_TOOLS/gradle.zip
+        | sha256sum -c -
+      - unzip -q -o $PHONON_TOOLS/gradle.zip -d $PHONON_TOOLS
+      - pushd ../..
+      - cargo fetch --locked --target aarch64-linux-android --target x86_64-linux-android
+      - bash android/build.sh --offline
+      - popd
+      - $PHONON_TOOLS/gradle-9.3.1/bin/gradle --no-daemon assembleRelease
+    ndk: 27.2.12479018
+
+MaintainerNotes: |
+  The fork maintainer supports inclusion and requests advice on the optional CC-NC
+  model downloads and appropriate anti-features/eligibility. NonFreeAssets is
+  proposed for review; it is not a statement that these functional models are
+  acceptable under that classification. English speech works with Apache-2.0 assets.
+  No models or embeddings are included in the APK. All seven choices are retained.
+
+  F-Droid distribution selects MIT from the source's MIT OR Apache-2.0 license
+  options; this is not relicensing. Both legal files and all notices stay.
+
+  Manual output/build is a deliberate explicit-tooling choice, using the upstream
+  wrapper's exact Gradle distribution and checksum. The separately maintained
+  F-Droid Gradle selector supports wrapper 9.3.1 and AGP 9.1; this route is not an
+  incompatibility workaround. RUSTUP_VERSION pins the fetched installer too.
+  Tool/dependency provisioning runs in build, after the source scan. Rust and
+  Gradle caches are outside the checkout; no scanignore/scandelete is needed.
+  The native compilation itself is frozen after cargo fetch. Gradle may fetch
+  Maven dependencies. No JNI binaries are supplied from caches or srclibs.
+  See docs/f-droid.md for the handoff and local validation limitations.
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
+CurrentVersion: 1.1.0
+CurrentVersionCode: 14

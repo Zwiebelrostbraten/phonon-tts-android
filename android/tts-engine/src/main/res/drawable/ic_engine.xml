@@ -1,11 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- A speaker with sound waves. -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="48dp"
-    android:height="48dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
-    <path
-        android:fillColor="#FF3F51B5"
-        android:pathData="M3,9v6h4l5,5V4L7,9H3zM16.5,12c0,-1.77 -1.02,-3.29 -2.5,-4.03v8.05c1.48,-0.73 2.5,-2.25 2.5,-4.02zM14,3.23v2.06c2.89,0.86 5,3.54 5,6.71s-2.11,5.85 -5,6.71v2.06c4.01,-0.91 7,-4.49 7,-8.77s-2.99,-7.86 -7,-8.77z" />
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+<path android:fillColor="#123D48" android:pathData="M0,0h108v108h-108z"/>
+<path android:fillColor="#6CE5CF" android:pathData="M30,30 L78,30 Q84,30 84,36 L84,65 Q84,71 78,71 L49,71 L35,81 L35,71 L30,71 Q24,71 24,65 L24,36 Q24,30 30,30 Z"/>
+<path android:fillColor="#123D48" android:pathData="M35,46h5v12h-5z M44,39h5v26h-5z M53,43h5v18h-5z M62,37h5v30h-5z M71,46h5v12h-5z"/>
 </vector>

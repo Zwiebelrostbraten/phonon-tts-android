@@ -11,12 +11,12 @@
         android:localeConfig="@xml/locales_config"
         android:usesCleartextTraffic="false"
         android:allowBackup="false"
-        android:icon="@drawable/ic_engine"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name">
 
-        <service android:name=".InstallService" android:exported="false" android:foregroundServiceType="dataSync" />
+        <service android:name="ai.gradium.phonon.tts.InstallService" android:exported="false" android:foregroundServiceType="dataSync" />
         <service
-            android:name=".PhononService"
+            android:name="ai.gradium.phonon.tts.PhononService"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
@@ -29,7 +29,7 @@
         </service>
 
         <activity
-            android:name=".SettingsActivity"
+            android:name="ai.gradium.phonon.tts.SettingsActivity"
             android:exported="true"
             android:theme="@style/Settings">
             <intent-filter>
@@ -43,7 +43,7 @@
         </activity>
 
         <activity
-            android:name=".DataActivity"
+            android:name="ai.gradium.phonon.tts.DataActivity"
             android:exported="true"
             android:theme="@android:style/Theme.NoDisplay">
             <intent-filter>

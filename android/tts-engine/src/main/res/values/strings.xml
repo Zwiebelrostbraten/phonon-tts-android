@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-  <string name="app_name">Phonon TTS</string>
+  <string name="app_name">Phonon TTS Community</string>
   <string name="import_folder">Choose local model folder…</string>
   <string name="system_settings">Android speech settings</string>
   <string name="import_help">Choose a folder with config.json, tokenizer.json and model.q8.gguf or model.safetensors. Optional voices are copied too.</string>
@@ -30,7 +30,7 @@
   <string name="preview">Speak preview</string>
   <string name="stop_preview">Stop preview</string>
   <string name="licenses">Offline licenses</string>
-  <string name="about_fork">1.0.0 · Community fork · Offline speech</string>
+  <string name="about_fork">1.1.0 · Community fork · Offline speech</string>
   <string name="installed_model">Installed models</string>
   <string name="installed_details">%1$s · %2$.1f MB on device</string>
   <string name="model_actions">Download catalog · 7 models</string>

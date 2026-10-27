@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-  <string name="app_name">Phonon TTS</string>
+  <string name="app_name">Phonon TTS Community</string>
   <string name="import_folder">Choisir un dossier de modèle local…</string>
   <string name="system_settings">Paramètres vocaux Android</string>
   <string name="import_help">Choisissez un dossier contenant config.json, tokenizer.json et model.q8.gguf ou model.safetensors. Les voix facultatives sont également copiées.</string>
@@ -30,7 +30,7 @@
   <string name="preview">Écouter l’aperçu</string>
   <string name="stop_preview">Arrêter l’aperçu</string>
   <string name="licenses">Licences hors ligne</string>
-  <string name="about_fork">1.0.0 · Version communautaire · Synthèse hors ligne</string>
+  <string name="about_fork">1.1.0 · Version communautaire · Synthèse hors ligne</string>
   <string name="installed_model">Modèles installés</string>
   <string name="installed_details">%1$s · %2$.1f MB sur l’appareil</string>
   <string name="model_actions">Catalogue · 7 modèles</string>

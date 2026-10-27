@@ -1,0 +1,14 @@
+Phonon TTS Community is a community-maintained Android system text-to-speech engine based on Gradium Phonon. Use it with reading and accessibility apps that support Android system TTS. Speech runs locally on your CPU after you download a model.
+
+• Seven model choices for English, German, French, Spanish and Portuguese
+• Five interface languages, light and dark themes
+• 102 downloadable public voice embeddings
+• Per-language model selection, speech previews and adjustable speed
+• Individual model and voice deletion
+• No model weights or voice embeddings bundled in the APK
+
+Optional non-free assets: the six 40M checkpoints are licensed CC-BY-NC-4.0, for noncommercial use, and require Hugging Face approval and a read token. The English phonon-31m-en checkpoint and public voices are Apache-2.0 and do not require an account. Downloaded models have separate licenses from the app code (MIT OR Apache-2.0). Review the model terms before downloading.
+
+The app downloads models only on request and stores your token using Android Keystore encryption. Speech text and generated audio stay on your device. Network access is needed for downloads; inference works offline.
+
+Requires Android 7 or later and ARM64 with dotprod/FP16 support, or x86_64. This independent community fork has a distinct name, icon and application ID; it is not an official Gradium application. It does not migrate data from older installations.

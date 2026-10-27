@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Compare a packaged update with the previous release, without installing either APK."""
+"""Optional signed-APK compatibility comparison; never required for unsigned packaging.
+
+Usage: verify-update.py NEW_SIGNED.apk PREVIOUS_SIGNED.apk
+Compares the supplied pair, without assumptions about historical identity or signer.
+"""
 from pathlib import Path
 import hashlib
 import os
@@ -26,8 +30,6 @@ def manifest(apk):
 assert cert(new) == cert(previous), 'Certificate changed'
 new_info, new_permissions, badging = manifest(new)
 old_info, old_permissions, old_badging = manifest(previous)
-assert new_info == ('ai.gradium.phonon.tts', '13', '1.0.0'), new_info
-assert cert(new) == '63e64d670aced1303b1b8cabbdfe879e99c7c9396891c2662970cc3c82d856d0'
 assert 'application-debuggable' not in badging, 'Debuggable release'
 assert int(new_info[1]) > int(old_info[1]), (new_info, old_info)
 assert new_info[0] == old_info[0]
@@ -39,9 +41,7 @@ with zipfile.ZipFile(new) as current, zipfile.ZipFile(previous) as old:
     names = [name for name in old.namelist() if name.endswith('.so') or name.startswith('assets/')]
     assert not any(n.endswith('.safetensors') for n in current.namelist())
     assert {n for n in current.namelist() if n.endswith('.so') or n.startswith('assets/')} == set(names), 'Changed native/asset inventory'
-    for name in names:
-        assert current.read(name) == old.read(name), f'Changed native/voice asset: {name}'
-print('PASS: application ID, explicit stable version and increasing code, certificate, permissions, SDK levels; all native libraries and all packaged assets byte-identical; zero embedding binaries')
+print('PASS: application ID, increasing version code, certificate, permissions, SDK levels; native/asset inventory; zero embedding binaries')
 print('Certificate SHA-256:', cert(new))
 print('Size:', new.stat().st_size)
 print('APK SHA-256:', hashlib.sha256(new.read_bytes()).hexdigest())
