@@ -44,4 +44,4 @@ The [user guide](docs/user-guide.md) covers models, voices, local imports, updat
 
 ## License
 
-This community-maintained app is based on [Gradium’s Phonon](https://github.com/gradium-ai/xn-ptts). Code is licensed under [MIT](LICENSE-MIT) **or** [Apache-2.0](LICENSE-APACHE). Models have separate terms; public voices are Apache-2.0. See [credits and third-party notices](docs/user-guide.md#credits-and-licenses) and the [preserved upstream README](README.upstream.md).
+This community-maintained app is based on [Gradium’s Phonon](https://github.com/gradium-ai/xn-ptts). Code is licensed under [MIT](LICENSE-MIT) **or** [Apache-2.0](LICENSE-APACHE). Models have separate terms; public voices are Apache-2.0. See [credits and third-party notices](docs/user-guide.md#credits-and-licenses) and the [upstream runtime documentation](https://github.com/gradium-ai/xn-ptts).

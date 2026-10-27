@@ -6,6 +6,6 @@ Bug reports should include Android/device/CPU and app versions, selected model a
 
 For code changes, follow the [development guide](docs/android-development.md), run checks appropriate to the affected behavior and report what was actually tested. Distinguish host tests from device checks. For translations, keep all five locale resources and format placeholders consistent. For documentation, check local links and keep the English user guide consistent with the app.
 
-Preserve model access controls, download verification, token privacy and update compatibility. Do not include gated weights, credentials, signing keys or generated APKs in a pull request. Keep upstream runtime/platform directories and license notices intact unless a change specifically concerns them.
+Preserve model access controls, download verification, token privacy and update compatibility. Do not include gated weights, credentials, signing keys or generated APKs in a pull request. Preserve the shared CPU runtime, Android ABI and license notices.
 
 Describe any dependency, license or model/voice attribution changes. Code uses MIT OR Apache-2.0; model and voice licenses remain separate. Submit only material you have the right to contribute under the applicable terms.

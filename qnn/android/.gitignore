@@ -1,6 +1,0 @@
-.gradle/
-.kotlin/
-**/build/
-**/.cxx/
-local.properties
-ptts/src/main/jniLibs/

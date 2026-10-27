@@ -1,6 +1,6 @@
 # Android development
 
-The [user guide](user-guide.md) covers installation and use. This guide concerns the community CPU system-TTS app, not the upstream QNN integration.
+The [user guide](user-guide.md) covers installation and use. This guide covers the community CPU system-TTS app.
 
 ## Toolchain
 
@@ -36,6 +36,8 @@ R8 rules in [proguard-rules.pro](../android/tts-engine/proguard-rules.pro) prese
 For resource validation and the same selected host tests without packaging:
 
 ```sh
+python3 android/test_repository.py
+cargo test -p ptts --features hf
 python3 android/tts-engine/validate-resources.py
 ./android/tts-engine/gradlew -p android/tts-engine testDebugUnitTest \
   --tests ai.gradium.phonon.tts.FocusedTest \
@@ -55,7 +57,7 @@ PHONON_LIVE_VOICES=1 ./android/tts-engine/gradlew -p android/tts-engine \
   testDebugUnitTest --tests ai.gradium.phonon.tts.VoiceCatalogPolicyTest --rerun-tasks --console=plain
 ```
 
-This makes public network requests; no gated-model token is needed. See [1.0.0 validation](../android/tts-engine/RELEASE_1.0.0_VALIDATION.md) and the historical [Update 11 validation](../android/tts-engine/UPDATE11_VALIDATION.md) for recorded evidence and limitations. Host tests and downloaded voice validation do not establish Android runtime behavior.
+This makes public network requests; no gated-model token is needed. See the historical [1.0.0 validation](https://github.com/Zwiebelrostbraten/phonon-tts-android/blob/v1.0.0/android/tts-engine/RELEASE_1.0.0_VALIDATION.md) for recorded evidence and limitations. Host tests and downloaded voice validation do not establish Android runtime behavior.
 
 ## Device smoke checks
 
@@ -67,6 +69,10 @@ Use harmless sample text and record the device, CPU, Android version, app versio
 - Test cancellation, model switch during speech, deletion confirmation/cancellation and remaining model/voice availability. Native handle lifecycle and deletion UI need device confirmation.
 - Check light/dark UI, all five locales, accessibility and tempo. Pitch requests should have no effect.
 - In a compatible reader, test API 26+ sentence-position callbacks; do not interpret them as word alignment or promise Kindle compatibility.
+
+## Repository scope
+
+The Cargo workspace contains only `ptts` (shared inference core and regression fixtures) and `ptts-ffi` (CPU C/JNA interface). Native version remains 0.4.1; the app remains 1.0.0, code 13. Shared generic engine code and optional library features remain to avoid changing inference behavior; Android enables only tokenization (`hf`) and the CPU backend. Other platform frontends, desktop commands and upstream automation live in Git history and the [upstream project](https://github.com/gradium-ai/xn-ptts).
 
 ## Source map
 
@@ -80,4 +86,4 @@ Paths below are relative to `android/tts-engine/src/main/java/ai/gradium/phonon/
 | Optional public voices | `VoicePacks.kt`, `VoicePackStore.kt`, `VoiceCatalogPolicy.kt` |
 | Credentials and network policy | `TokenStore.kt`, `SecureDownload.kt` |
 
-The shared native wrapper is [android/PhononTTS.kt](../android/PhononTTS.kt); CPU library integration is described in [android/README.md](../android/README.md). The latter documents the upstream embedding API, separate from the installable app.
+The shared native wrapper is [android/PhononTTS.kt](../android/PhononTTS.kt); CPU library integration is described in [android/README.md](../android/README.md). The wrapper is compiled into the installable app.

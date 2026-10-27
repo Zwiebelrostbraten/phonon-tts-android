@@ -73,4 +73,4 @@ On Android 8+ (API 26), Phonon supplies sentence range callbacks for readers tha
 
 Phonon and its models are by **Gradium**. This community-maintained Android app is based on [gradium-ai/xn-ptts](https://github.com/gradium-ai/xn-ptts) and is not an official Gradium app. Code is available under [MIT](../LICENSE-MIT) **or** [Apache-2.0](../LICENSE-APACHE). Model terms are listed in [Models](#models); public voices are Apache-2.0.
 
-See the [bundled notices](../android/tts-engine/src/main/assets/licenses/NOTICE.txt), [voice attribution](../android/tts-engine/src/main/assets/licenses/Voices-NOTICE.txt) and [Sonic license](../android/tts-engine/src/main/assets/licenses/Sonic-LICENSE.txt). The [preserved upstream README](../README.upstream.md) covers other runtime integrations.
+See the [bundled notices](../android/tts-engine/src/main/assets/licenses/NOTICE.txt), [voice attribution](../android/tts-engine/src/main/assets/licenses/Voices-NOTICE.txt) and [Sonic license](../android/tts-engine/src/main/assets/licenses/Sonic-LICENSE.txt). The [upstream project](https://github.com/gradium-ai/xn-ptts) documents the original runtime and other integrations.

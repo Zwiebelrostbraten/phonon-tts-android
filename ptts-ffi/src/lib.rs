@@ -1,9 +1,6 @@
-//! C interface to Phonon. The PhononTTS Swift package wraps it, and Android apps call it
-//! through JNA (`android/README.md`).
+//! CPU C interface to Phonon, called through JNA by the Android app (`android/README.md`).
 //!
-//! The same calls run on one of two engines. On Apple platforms, `coreml` drives the Core ML
-//! driver, and `dir` is a bundle `export_coreml` wrote. Everywhere else, `cpu` runs
-//! `ptts::synth::Synth` on the CPU, and `dir` is a checkpoint folder.
+//! The CPU engine loads a checkpoint folder.
 //!
 //! `ptts_new` loads the model; it is the expensive call. `ptts_speak` may then be called
 //! repeatedly, streaming the audio to a callback as it is decoded.
@@ -16,16 +13,10 @@ use std::ffi::{CStr, CString, c_char, c_void};
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::path::Path;
 
-#[cfg(target_vendor = "apple")]
-mod coreml;
-#[cfg(target_vendor = "apple")]
-use coreml::Engine;
-#[cfg(not(target_vendor = "apple"))]
 mod cpu;
-#[cfg(not(target_vendor = "apple"))]
 use cpu::Engine;
 
-/// Where the flow LM runs. Only `PTTS_UNIT_CPU` exists off Apple.
+/// Where the flow LM runs. Only `PTTS_UNIT_CPU` is supported; ANE is reserved for ABI compatibility.
 pub const PTTS_UNIT_CPU: u32 = 0;
 pub const PTTS_UNIT_ANE: u32 = 2;
 
@@ -49,8 +40,8 @@ pub struct PttsResult {
     pub total_ms: f64,
 }
 
-/// Called with PCM as it is decoded, on the thread that called `ptts_speak`: one frame per call
-/// on Core ML, one or more on the CPU. Return false to stop speaking: generation ends there and
+/// Called with PCM as it is decoded, on the thread that called `ptts_speak`, with one or more
+/// frames per call. Return false to stop speaking: generation ends there and
 /// `ptts_speak` returns normally with what was produced.
 pub type PttsFrameFn = extern "C" fn(*const f32, usize, *mut c_void) -> bool;
 
@@ -95,12 +86,10 @@ fn open(dir: &Path, unit: u32, lang: &str) -> Result<PttsHandle, String> {
     Ok(PttsHandle { engine, voice_blob, language_blob, last_error: None })
 }
 
-/// Load the model in `dir` for `unit` (`PTTS_UNIT_ANE` or `PTTS_UNIT_CPU`), normalizing text as
-/// `lang` (`en`, `fr`, `de`, `es`, `pt`, or `none`). On Apple, `dir` is an exported bundle,
-/// compiled for this device first if it has not been (once per install); elsewhere it is a
-/// checkpoint folder, and only `PTTS_UNIT_CPU` exists. Null on failure; then
-/// `ptts_last_error(NULL)`, on the same thread, says why. A bundle without voices fails to load; a
-/// checkpoint folder without voices loads, lists none, and speaks in no particular voice.
+/// Load a checkpoint folder in `dir` using `PTTS_UNIT_CPU`, normalizing text as
+/// `lang` (`en`, `fr`, `de`, `es`, `pt`, or `none`). Null on failure; then
+/// `ptts_last_error(NULL)`, on the same thread, says why. A checkpoint without voices
+/// loads, lists none, and speaks in no particular voice.
 ///
 /// # Safety
 /// `dir` and `lang` must be NUL-terminated UTF-8.

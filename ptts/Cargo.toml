@@ -12,10 +12,7 @@ categories.workspace = true
 license.workspace = true
 
 [dependencies]
-anyhow = { workspace = true, optional = true }
-clap = { workspace = true, optional = true }
 hf-hub = { workspace = true, optional = true }
-tracing-chrome = { workspace = true, optional = true }
 xn = { workspace = true }
 ebur128 = { workspace = true }
 rand = { workspace = true, features = ["std_rng"] }
@@ -31,49 +28,10 @@ safetensors = { workspace = true }
 thiserror = { workspace = true }
 half = { workspace = true, optional = true }
 
-[target.'cfg(unix)'.dependencies]
-libc = { workspace = true, optional = true }
-
-[dev-dependencies]
-anyhow = { workspace = true }
-clap = { workspace = true }
-half = { workspace = true }
-# For the `export_coreml` example: the Core ML graph builder, and hashing the files it writes.
-ptts-coreml = { path = "../ptts-coreml", features = ["gguf"] }
-sha2 = { workspace = true }
-tracing-chrome = { workspace = true }
-
-[target.'cfg(unix)'.dev-dependencies]
-libc = { workspace = true }
-
-# docs.rs builds with default features unless told otherwise, which would render the crate
-# without `tok` or `audio` and with no implementation of the `Tokenizer` trait in sight. Not
-# `all-features`: that turns on `cuda`, whose build script needs `nvcc`. The `docs` CI job
-# builds this same set, so a docs.rs failure shows up on the PR instead of after publishing.
-[package.metadata.docs.rs]
-features = ["hf", "audio", "hub"]
-rustdoc-args = ["--cfg", "docsrs"]
-
-# `cargo binstall ptts` fetches the command from the desktop archives that
-# `.github/workflows/cli-release.yml` attaches to each release (see `scripts/package-cli.py`).
-# A target without an archive falls back to `cargo install`, which installs the command only
-# when binstall is given `--features cli`.
-# Quick-install is off: its prebuilt binaries use default features, which have no command.
-[package.metadata.binstall]
-pkg-url = "{ repo }/releases/download/v{ version }/{ name }-{ version }-{ target }{ archive-suffix }"
-bin-dir = "{ name }-{ version }-{ target }/{ bin }{ binary-ext }"
-pkg-fmt = "tgz"
-disabled-strategies = ["quick-install"]
-
-[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
-pkg-fmt = "zip"
-
 [features]
 default = []
 # Downloads `hf://` checkpoints from the Hugging Face Hub in `Checkpoint::locate`.
 hub = ["dep:hf-hub"]
-# Installable command; the library stays free of download and CLI dependencies by default.
-cli = ["hf", "audio", "hub", "dep:anyhow", "dep:clap", "dep:tracing-chrome", "dep:libc"]
 cuda = ["xn/cuda", "dep:half"]
 vulkan = ["xn/vulkan"]
 metal = ["xn/metal", "dep:half"]
@@ -85,26 +43,3 @@ kai = ["xn/kai"]
 hf = ["dep:tokenizers"]
 # Decoding and resampling audio files (`ptts::audio`), for voice cloning.
 audio = ["dep:symphonia", "dep:rubato"]
-
-[[example]]
-name = "say"
-required-features = ["hf"]
-
-[[bin]]
-name = "ptts"
-path = "src/bin/ptts/main.rs"
-required-features = ["cli"]
-
-[[example]]
-name = "bench"
-required-features = ["hf"]
-
-[[example]]
-name = "quantize"
-
-[[example]]
-name = "create_voice"
-required-features = ["audio"]
-
-[[example]]
-name = "export_coreml"
