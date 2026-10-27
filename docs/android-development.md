@@ -1,6 +1,6 @@
 # Android development
 
-The [English app guide](../README.md) and [German app guide](../README.de.md) cover installation and use. This guide concerns the community CPU system-TTS app, not the upstream QNN integration.
+The [user guide](user-guide.md) covers installation and use. This guide concerns the community CPU system-TTS app, not the upstream QNN integration.
 
 ## Toolchain
 

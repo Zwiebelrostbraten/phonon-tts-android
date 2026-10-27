@@ -1,6 +1,6 @@
 # Phonon CPU library on Android
 
-> **Embedding/developer reference.** For the installable community system-TTS app, use the [English app guide](../README.md), [German app guide](../README.de.md) or [app development guide](../docs/android-development.md). QNN below is a separate upstream integration.
+> **Embedding/developer reference.** For the installable community system-TTS app, use the [user guide](../docs/user-guide.md) or [app development guide](../docs/android-development.md). QNN below is a separate upstream integration.
 
 For supported Snapdragon NPUs, the [QNN AAR](../qnn/android/README.md) provides a
 Kotlin API and compiled model support on Android 12+ ARM64. Build it from this repository;
@@ -133,4 +133,4 @@ These routes have not been tested here yet; the Kotlin wrapper and the C interfa
 To run Phonon in a WebView instead, use the [`phonon-tts`](../ptts-wasm/js/README.md) npm package,
 which runs the same model as WebAssembly.
 
-> Historical Android app updates are recorded in [release notes](tts-engine/RELEASE_NOTES.md). For current token storage, downloaded voice packs and reader limitations, use the [app guide](../README.md).
+> Historical Android app updates are recorded in [release notes](tts-engine/RELEASE_NOTES.md). For current token storage, downloaded voice packs and reader limitations, use the [user guide](../docs/user-guide.md).
