@@ -20,7 +20,7 @@
 
 Phonon TTS Community brings [Gradium Phonon](https://github.com/gradium-ai/xn-ptts) to Android as a system text-to-speech engine. Use it with reading and accessibility apps that support Android’s TextToSpeech service. After downloading a model and any optional voices, speech is generated entirely on your device, without an internet connection.
 
-**Distribution status:** The download link currently provides the earlier **Phonon TTS** release. The **1.1.0 source** prepares Phonon TTS Community with a new application ID (`io.github.zwiebelrostbraten.phonontts`), distinct artwork and no migration of earlier app data. Its release builds are unsigned for distributors to sign. It is not yet listed on F-Droid; see [distribution and signing](docs/f-droid.md).
+**Distribution status:** The download link provides the signed **Phonon TTS Community 1.1.0** APK, with a new application ID (`io.github.zwiebelrostbraten.phonontts`), distinct artwork and a dedicated Community release key. It installs alongside the earlier Phonon TTS app; earlier app data is not migrated. Source builds remain unsigned by default. It is not yet listed on F-Droid; see [distribution and signing](docs/f-droid.md).
 
 ## Features
 

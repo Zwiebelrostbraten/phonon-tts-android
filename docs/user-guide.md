@@ -13,13 +13,13 @@ Requires **Android 7+ (API 24)** and ARM64 with **ARMv8.2 dotprod and FP16**, or
 3. Select an installed model, spoken language and voice, then play the sample. Additional voice packs are optional downloads.
 4. In Android settings, search for **Text-to-speech output**, choose the app as the preferred engine and play the system sample. Setting names vary by device. Your reader must support Android system TTS.
 
-**Which release you get:** the download link currently provides the earlier **Phonon TTS** release under `ai.gradium.phonon.tts`, whose engine is labelled **Phonon TTS** in Android settings. The 1.1.0 **Phonon TTS Community** source has its own application ID and is not distributed as an APK yet; see [distribution status](../README.md) and [submission and signing notes](f-droid.md).
+**Which release you get:** the download link provides the signed **Phonon TTS Community 1.1.0** APK, labelled **Phonon TTS Community** in the launcher and Android TTS settings. Its package is `io.github.zwiebelrostbraten.phonontts`. It installs separately from the earlier `ai.gradium.phonon.tts` app; open the Community app, set up its models and select it as the TTS engine. The older app and its data remain untouched.
 
 ## Updates and installation warnings
 
-Install an update over the existing app to retain models, voices, preferences and the saved token. Do not uninstall or clear app data to resolve an update problem without first considering the data loss.
+For later updates to the same Community installation, install the matching GitHub APK over the existing app to retain models, voices, preferences and the saved token. Do not uninstall or clear app data to resolve an update problem without first considering the data loss.
 
-Version 1.1.0 uses the separate application ID `io.github.zwiebelrostbraten.phonontts` and does not migrate older app data. Source release APKs are unsigned and cannot be installed until a distributor signs them. F-Droid would sign its own builds if accepted. Use signed APKs from a trusted distributor; later updates for this identity need that distributor’s matching signature. Historical 1.0.0 releases used a debug certificate. See [submission and signing notes](f-droid.md).
+Version 1.1.0 uses the separate application ID `io.github.zwiebelrostbraten.phonontts` and does not migrate older app data. The GitHub APK is signed with a dedicated Community release key; historical 1.0.0 releases used a different debug certificate. Source builds remain unsigned by default, and F-Droid would sign its own builds if accepted. Updates require the same application's matching signing identity, so GitHub and F-Droid builds are not interchangeable in-place. See [submission and signing notes](f-droid.md).
 
 Permission to install from a browser or file manager differs from a harmful-app warning. If Android displays a security warning, stop and verify the download and release information; do not disable Play Protect.
 
