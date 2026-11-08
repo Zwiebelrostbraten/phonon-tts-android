@@ -72,7 +72,8 @@ class PhononService : TextToSpeechService() {
         } ?: run { fail(callback,TextToSpeech.ERROR_INVALID_REQUEST); return }
         val lang = choice.lang
         val speaker = choice.speaker
-        val text = request.charSequenceText?.toString().orEmpty()
+        // Apps like TomTom pass SSML straight through; the models would read the markup aloud.
+        val text = Ssml.strip(request.charSequenceText?.toString().orEmpty())
         if (callback.start(SAMPLE_RATE, AudioFormat.ENCODING_PCM_16BIT, 1) != TextToSpeech.SUCCESS) return
         if (text.isBlank()) {
             callback.done()
